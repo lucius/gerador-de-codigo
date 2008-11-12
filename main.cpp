@@ -9,7 +9,9 @@
 #include "./includes/analisador-sintatico/includes/ConteudoHash.h"
 #include "./includes/analisador-sintatico/includes/StructHashVariavel.h"
 
-#include "./includes/AnalisadorSemantico.h"
+#include "./includes/analisador-semantico/includes/AnalisadorSemantico.h"
+
+#include "./includes/GeradorDeCodigo.h"
 
 
 int
@@ -27,6 +29,9 @@ main(int argc, char* argv[])
 	AnalisadorSemantico*
 	semantico;
 
+	GeradorDeCodigo*
+	gerador;
+
 	try
 	{
 		/*
@@ -39,7 +44,10 @@ main(int argc, char* argv[])
 		else if ( argv[2] )
 		{
 			lexico = new AnalisadorLexico( argv[1], argv[2] );
-			sintatico = new AnalisadorSintatico( lexico->getMapAnalisadorLexico(), argv[2] );
+			if( LogErros::getInstancia( ).getQuantidadeErros() )
+			{
+				sintatico = new AnalisadorSintatico( lexico->getMapAnalisadorLexico(), argv[2] );
+			}
 		}
 		/*
 		 * Se nao foi especificado um nome para o log, o resultado será exibido na saida padrao do sistema
@@ -47,9 +55,17 @@ main(int argc, char* argv[])
 		else
 		{
 			lexico = new AnalisadorLexico( argv[1] );
-			sintatico = new AnalisadorSintatico( lexico->getMapAnalisadorLexico() );
+			if( LogErros::getInstancia( ).getQuantidadeErros() )
+			{
+				sintatico = new AnalisadorSintatico( lexico->getMapAnalisadorLexico() );
+			}
 		}
-		semantico = new AnalisadorSemantico( sintatico->getSaidaAnalisadorSintatico() );
+
+		if( LogErros::getInstancia( ).getQuantidadeErros() )
+		{
+			semantico = new AnalisadorSemantico( sintatico->getSaidaAnalisadorSintatico() );
+			gerador = new GeradorDeCodigo( sintatico->getSaidaAnalisadorSintatico() );
+		}
 	}
 	/*
 	 * Se ocorrer algum problema durante a execucao do Analisador Lexico, o erro sera exibido

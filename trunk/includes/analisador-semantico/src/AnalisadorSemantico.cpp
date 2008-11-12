@@ -73,7 +73,7 @@ AnalisadorSemantico::verificaAtribuicao( NoArvoreSintatica* _atribuicao )
 	{
 		_nomeVariavel = _atribuicao->getFilhos()[0]->getFilhos()[0]->getFilhos()[0]->getDescricao();
 		_tipoVariavel = this->hash[std::pair<const std::string, const unsigned int>(_nomeVariavel, this->nivelLexicoAtual)]->second->getTipo( );
-		std::cout << _tipoVariavel;
+
 	}
 
 	return true;

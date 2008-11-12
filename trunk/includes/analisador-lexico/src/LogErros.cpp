@@ -92,6 +92,12 @@ LogErros::getLog( )
 	}
 }
 
+bool
+LogErros::getQuantidadeErros( )
+{
+	return LogErros::erros.empty( );
+}
+
 
 
 /**********************

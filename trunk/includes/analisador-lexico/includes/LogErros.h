@@ -42,6 +42,9 @@ class LogErros
 		void
 		getLog( );
 
+		bool
+		getQuantidadeErros( );
+
 	protected:
 		LogErros( );
 

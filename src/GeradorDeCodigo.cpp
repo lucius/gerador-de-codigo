@@ -17,13 +17,33 @@ itos( int _inteiro )
 	return _buffer.str();
 }
 
+int
+stoi( std::string _string )
+{
+	if( _string == "true" )
+	{
+		return 1;
+	}
+	else if( _string == "false" )
+	{
+		return 0;
+	}
+	else
+	{
+		return ::atoi( _string.c_str() );
+	}
+}
+
 
 GeradorDeCodigo::GeradorDeCodigo( std::pair<TabelaHash*, NoArvoreSintatica*> _saidaAnalisadorSintatico )
 {
 	this->hash = *(_saidaAnalisadorSintatico.first);
 	this->raiz = _saidaAnalisadorSintatico.second;
 
-	this->noCorrente = this->raiz;
+	this->nivelLexicoAtual = 0;
+	this->contadorLabel = 1;
+
+	this->atribuiLabel( "CorpoProgramaPrincipal" );
 
 	this->iniciaGeracaoDeCodigo( );
 
@@ -44,8 +64,6 @@ GeradorDeCodigo::salvaCodigoMepa( )
 	std::string
 	_caminhoCodigo = "../execMepa/" + this->nomePrograma + ".mep";
 
-	std::cout << _caminhoCodigo;
-
 	std::string
 	_stringBufferComandos;
 
@@ -65,39 +83,85 @@ void
 GeradorDeCodigo::iniciaGeracaoDeCodigo( )
 {
 	std::vector<NoArvoreSintatica*>
-	_filhos = this->noCorrente->getFilhos( );
+	_filhos = this->raiz->getFilhos( );
 
 	std::vector<NoArvoreSintatica*>::iterator
 	_iteradorFilhos;
 
-	this->nomePrograma = _filhos[1]->getFilhos( )[0]->getDescricao( );
-
-	this->INPP( );
-
-	this->empilhaComando( "PARA" );
 
 	for( _iteradorFilhos = _filhos.begin(); _iteradorFilhos != _filhos.end(); ++_iteradorFilhos )
 	{
-		if( (*_iteradorFilhos)->getDescricao() == "<PARTE_DECLARACOES_VARIAVEIS>" )
+		if( (*_iteradorFilhos)->getDescricao() == "program" )
 		{
-				this->noCorrente = (*_iteradorFilhos);
+			this->INPP( );
+		}
+		else if( (*_iteradorFilhos)->getDescricao() == "<IDENTIFICADOR>" )
+		{
+			this->nomePrograma = (*_iteradorFilhos)->getFilhos( )[0]->getDescricao( );
+		}
+		else if( (*_iteradorFilhos)->getDescricao() == "<BLOCO>" )
+		{
+
+			this->bloco( *_iteradorFilhos );
+
+			while( !this->pilhaComandos.empty() )
+			{
+				this->desempilhaComando( );
+			}
+		}
+		else if( (*_iteradorFilhos)->getDescricao() == "." )
+		{
+			this->PARA( );
 		}
 	}
-
-	this->declaracaoDeVariaveis( _filhos[_filhos.size()-2]->getFilhos()[0] );
-
-	while( !this->pilhaComandos.empty() )
-	{
-		this->desempilhaComando( );
-	}
-
 }
 
 void
-GeradorDeCodigo::declaracaoDeVariaveis( NoArvoreSintatica* _parteDeclaracaoVariaveis )
+GeradorDeCodigo::bloco( NoArvoreSintatica* _bloco )
 {
 	std::vector<NoArvoreSintatica*>
-	_filhos = _parteDeclaracaoVariaveis->getFilhos( );
+	_filhos = _bloco->getFilhos( );
+
+	std::vector<NoArvoreSintatica*>::iterator
+	_iteradorFilhos;
+
+	for( _iteradorFilhos = _filhos.begin(); _iteradorFilhos != _filhos.end(); ++_iteradorFilhos )
+	{
+
+		if( (*_iteradorFilhos)->getDescricao() == "<PARTE_DECLARACOES_ROTULOS>" )
+		{
+			this->declaracaoDeRotulos( *_iteradorFilhos );
+		}
+		else if( (*_iteradorFilhos)->getDescricao() == "<PARTE_DECLARACOES_VARIAVEIS>" )
+		{
+			this->declaracaoDeVariaveis( *_iteradorFilhos );
+
+			this->DSVS( this->ultimosLabelsInseridos.back() );
+		}
+		else if( (*_iteradorFilhos)->getDescricao() == "<PARTE_DECLARACOES_SUB_ROTINAS>" )
+		{
+			this->declaracaoDeSubrotinas( *_iteradorFilhos );
+		}
+		else if( (*_iteradorFilhos)->getDescricao() == "<COMANDO_COMPOSTO>" )
+		{
+			this->insereLabelNada( );
+			this->comandoComposto( *_iteradorFilhos );
+		}
+	}
+}
+
+void
+GeradorDeCodigo::declaracaoDeRotulos( NoArvoreSintatica* _parteDeclaracoesRotulos )
+{
+
+}
+
+
+void
+GeradorDeCodigo::declaracaoDeVariaveis( NoArvoreSintatica* _parteDeclaracoesVariaveis )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _parteDeclaracoesVariaveis->getFilhos( );
 
 	unsigned int
 	_quantidadeVariaveis = 0;
@@ -116,6 +180,468 @@ GeradorDeCodigo::declaracaoDeVariaveis( NoArvoreSintatica* _parteDeclaracaoVaria
 }
 
 void
+GeradorDeCodigo::declaracaoDeSubrotinas( NoArvoreSintatica* _parteDeclaracoesSubrotinas )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _parteDeclaracoesSubrotinas->getFilhos( );
+}
+
+void
+GeradorDeCodigo::comandoComposto( NoArvoreSintatica* _comandoComposto )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _comandoComposto->getFilhos( );
+
+	std::vector<NoArvoreSintatica*>::iterator
+	_iteradorFilhos;
+
+	for( _iteradorFilhos = _filhos.begin(); _iteradorFilhos != _filhos.end(); ++_iteradorFilhos )
+	{
+
+		if( (*_iteradorFilhos)->getDescricao() == "<COMANDO>" )
+		{
+			this->comando( *_iteradorFilhos );
+		}
+	}
+}
+
+void
+GeradorDeCodigo::comando( NoArvoreSintatica* _comando )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _comando->getFilhos( );
+
+	std::vector<NoArvoreSintatica*>::iterator
+	_iteradorFilhos;
+
+	for( _iteradorFilhos = _filhos.begin(); _iteradorFilhos != _filhos.end(); ++_iteradorFilhos )
+	{
+		if( (*_iteradorFilhos)->getDescricao() == "<NUMERO>" )
+		{
+
+		}
+		if( (*_iteradorFilhos)->getDescricao() == "<COMANDO_SEM_ROTULO>" )
+		{
+			this->comandoSemRotulo( *_iteradorFilhos );
+		}
+	}
+}
+
+void
+GeradorDeCodigo::comandoSemRotulo( NoArvoreSintatica* _comandoSemRotulo )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _comandoSemRotulo->getFilhos( );
+
+	if( _filhos[0]->getDescricao() == "<COMANDO_REPETITIVO>" )
+	{
+		this->comandoRepetitivo( _filhos[0] );
+	}
+	else if( _filhos[0]->getDescricao() == "<COMANDO_CONDICIONAL>" )
+	{
+		this->comandoCondicional( _filhos[0] );
+	}
+	else if( _filhos[0]->getDescricao() == "<COMANDO_COMPOSTO>" )
+	{
+		this->comandoComposto( _filhos[0] );
+	}
+	else if( _filhos[0]->getDescricao() == "<DESVIOS>" )
+	{
+		this->desvios( _filhos[0] );
+	}
+	else if( _filhos[0]->getDescricao() == "<COMANDO_LEITURA>" )
+	{
+		this->comandoLeitura( _filhos[0] );
+	}
+	else if( _filhos[0]->getDescricao() == "<COMANDO_ESCRITA>" )
+	{
+		this->comandoEscrita( _filhos[0] );
+	}
+	else if( _filhos[0]->getDescricao() == "<ATRIBUICAO>" )
+	{
+		this->atribuicao( _filhos[0] );
+	}
+	else if( _filhos[0]->getDescricao() == "<CHAMADA_PROCEDIMENTO>" )
+	{
+		this->chamadaProcedimento( _filhos[0] );
+	}
+}
+
+void
+GeradorDeCodigo::comandoRepetitivo( NoArvoreSintatica* _comandoRepetitivo )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _comandoRepetitivo->getFilhos( );
+}
+
+void
+GeradorDeCodigo::comandoCondicional( NoArvoreSintatica* _comandoCondicional )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _comandoCondicional->getFilhos( );
+}
+
+void
+GeradorDeCodigo::desvios( NoArvoreSintatica* _desvios )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _desvios->getFilhos( );
+}
+
+void
+GeradorDeCodigo::comandoLeitura( NoArvoreSintatica* _comandoLeitura )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhosListaIdentificadores = _comandoLeitura->getFilhos( )[2]->getFilhos( );
+
+	std::vector<NoArvoreSintatica*>::iterator
+	_iteradorFilhos;
+
+	TabelaHash::iterator
+	_resultadoBusca;
+
+	unsigned int
+	_contador;
+
+	std::string
+	_classificacao;
+
+	std::string
+	_descricao;
+
+
+	for( _iteradorFilhos = _filhosListaIdentificadores.begin(); _iteradorFilhos != _filhosListaIdentificadores.end(); ++_iteradorFilhos )
+	{
+		if( (*_iteradorFilhos)->getDescricao( ) == "<IDENTIFICADOR>" )
+		{
+			_descricao =  (*_iteradorFilhos)->getFilhos( )[0]->getDescricao( );
+
+			/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
+			 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
+			 */
+			for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
+			{
+				if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
+				{
+					_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
+
+					_classificacao = _resultadoBusca->second->getConteudo();
+
+					break;
+				}
+			}
+
+			if( _classificacao == "variavel" )
+			{
+				this->LEIT( );
+
+				this->ARMZ( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
+			}
+			else if( _classificacao == "parametrosFormais" )
+			{
+				if( _resultadoBusca->second->parametrosFormais->passagem == false )
+				{
+					this->LEIT( );
+
+					this->ARMZ( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
+				}
+				else if( _resultadoBusca->second->parametrosFormais->passagem == true )
+				{
+					this->LEIT( );
+
+					this->ARMI( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
+				}
+			}
+
+		}
+	}
+}
+
+void
+GeradorDeCodigo::comandoEscrita( NoArvoreSintatica* _comandoEscrita )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _comandoEscrita->getFilhos( );
+
+	std::vector<NoArvoreSintatica*>::iterator
+	_iteradorFilhos;
+
+	for( _iteradorFilhos = _filhos.begin(); _iteradorFilhos != _filhos.end(); ++_iteradorFilhos )
+	{
+		if( (*_iteradorFilhos)->getDescricao() == "<EXPRESSAO>" )
+		{
+			this->expressao( (*_iteradorFilhos) );
+
+			this->IMPR( );
+		}
+	}
+}
+
+void
+GeradorDeCodigo::atribuicao( NoArvoreSintatica* _atribuicao )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _atribuicao->getFilhos( );
+
+	TabelaHash::iterator
+	_resultadoBusca;
+
+	unsigned int
+	_contador;
+
+	std::string
+	_classificacao;
+
+	std::string
+	_descricao = _filhos[0]->getFilhos()[0]->getFilhos()[0]->getDescricao();
+
+	/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
+	 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
+	 */
+	for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
+	{
+		if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
+		{
+			_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
+
+			_classificacao = _resultadoBusca->second->getConteudo();
+
+			break;
+		}
+	}
+
+	this->expressao( _filhos[2] );
+
+	if( _classificacao == "variavel" )
+	{
+		this->ARMZ( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
+	}
+	else if( _classificacao == "parametrosFormais" )
+	{
+		if( _resultadoBusca->second->parametrosFormais->passagem == false )
+		{
+			this->ARMZ( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
+		}
+		else if( _resultadoBusca->second->parametrosFormais->passagem == true )
+		{
+			this->ARMI( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
+		}
+	}
+	else if( _classificacao == "procedimento|funcao" )
+	{
+
+	}
+}
+
+void
+GeradorDeCodigo::chamadaProcedimento( NoArvoreSintatica* _chamadaProcedimento )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _chamadaProcedimento->getFilhos( );
+}
+
+void
+GeradorDeCodigo::expressao( NoArvoreSintatica* _expressao )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _expressao->getFilhos( );
+
+	this->expressaoSimples( _filhos[0] );
+
+	if( _filhos.size() != 1 )
+	{
+		this->relacao( _filhos[1] );
+		this->expressaoSimples( _filhos[2] );
+	}
+}
+
+void
+GeradorDeCodigo::relacao( NoArvoreSintatica* _relacao )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _relacao->getFilhos( );
+}
+
+void
+GeradorDeCodigo::expressaoSimples( NoArvoreSintatica* _expressaoSimples )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _expressaoSimples->getFilhos( );
+
+	std::vector<NoArvoreSintatica*>::iterator
+	_iteradorFilhos = _filhos.begin( );
+
+	bool
+	_desempilha = false;
+
+	if( _filhos[0]->getDescricao() == "+" )
+	{
+		++_iteradorFilhos;
+		this->termo( *_iteradorFilhos );
+
+		this->CRCT( 1 );
+		this->MULT( );
+	}
+	else if ( _filhos[0]->getDescricao() == "-" )
+	{
+		++_iteradorFilhos;
+		this->termo( *_iteradorFilhos );
+
+		this->CRCT( -1 );
+		this->MULT( );
+	}
+	else
+	{
+		this->termo( _filhos[0] );
+	}
+
+	++_iteradorFilhos;
+
+	for( ; _iteradorFilhos != _filhos.end(); ++_iteradorFilhos )
+	{
+		if( (*_iteradorFilhos)->getDescricao() == "+" )
+		{
+			this->empilhaComando( "SOMA" );
+			_desempilha = true;
+		}
+		else if( (*_iteradorFilhos)->getDescricao() == "-" )
+		{
+			this->empilhaComando( "SUBT" );
+			_desempilha = true;
+		}
+		else if( (*_iteradorFilhos)->getDescricao() == "or" )
+		{
+			this->empilhaComando( "DISJ" );
+			_desempilha = true;
+		}
+		else
+		{
+			this->termo( (*_iteradorFilhos) );
+
+			if( _desempilha )
+			{
+				this->desempilhaComando( );
+				_desempilha = false;
+			}
+		}
+	}
+}
+
+void
+GeradorDeCodigo::termo( NoArvoreSintatica* _termo )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _termo->getFilhos( );
+
+	std::vector<NoArvoreSintatica*>::iterator
+	_iteradorFilhos;
+
+	bool
+	_desempilha = false;
+
+	for( _iteradorFilhos = _filhos.begin( ); _iteradorFilhos != _filhos.end(); ++_iteradorFilhos )
+	{
+		if( (*_iteradorFilhos)->getDescricao() == "*" )
+		{
+			this->empilhaComando( "MULT" );
+			_desempilha = true;
+		}
+		else if( (*_iteradorFilhos)->getDescricao() == "div" )
+		{
+			this->empilhaComando( "DIVI" );
+			_desempilha = true;
+		}
+		else if( (*_iteradorFilhos)->getDescricao() == "and" )
+		{
+			this->empilhaComando( "CONJ" );
+			_desempilha = true;
+		}
+		else
+		{
+			this->fator( (*_iteradorFilhos) );
+
+			if( _desempilha )
+			{
+				this->desempilhaComando( );
+				_desempilha = false;
+			}
+		}
+	}
+}
+
+void
+GeradorDeCodigo::fator( NoArvoreSintatica* _fator )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _fator->getFilhos( );
+
+	TabelaHash::iterator
+	_resultadoBusca;
+
+	unsigned int
+	_contador;
+
+	std::string
+	_classificacao;
+
+	std::string
+	_descricao;
+
+
+	if( _filhos[0]->getDescricao() == "not")
+	{
+		this->fator( _filhos[1] );
+	}
+	else if( _filhos[0]->getDescricao() == "(" )
+	{
+		this->expressao( _filhos[1] );
+	}
+	else if( _filhos[0]->getDescricao() == "<NUMERO>" )
+	{
+		this->CRCT( stoi(_filhos[0]->getFilhos()[0]->getDescricao()) );
+	}
+	else if( _filhos[0]->getDescricao() == "<VARIAVEL>" )
+	{
+		_descricao = _filhos[0]->getFilhos()[0]->getFilhos()[0]->getDescricao();
+
+		/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
+		 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
+		 */
+		for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
+		{
+			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
+			{
+				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
+
+				_classificacao = _resultadoBusca->second->getConteudo();
+
+				break;
+			}
+		}
+
+		if( _classificacao == "variavel" )
+		{
+			this->CRVL( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
+		}
+		else if( _classificacao == "parametrosFormais" )
+		{
+			if( _resultadoBusca->second->parametrosFormais->passagem == false )
+			{
+				this->CRVL( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
+			}
+			else if( _resultadoBusca->second->parametrosFormais->passagem == true )
+			{
+				this->CRVI( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
+			}
+		}
+		else if( _classificacao == "procedimento|funcao" )
+		{
+
+		}
+	}
+}
+
+void
 GeradorDeCodigo::empilhaComando( std::string _comando )
 {
 	this->pilhaComandos.push_back( _comando );
@@ -124,8 +650,29 @@ GeradorDeCodigo::empilhaComando( std::string _comando )
 void
 GeradorDeCodigo::desempilhaComando( )
 {
-	this->bufferComandos << *(this->pilhaComandos.rbegin() ) << std::endl;
-	this->pilhaComandos.pop_back( );
+	if( this->pilhaComandos.size() != 0 )
+	{
+		this->bufferComandos << *(this->pilhaComandos.rbegin() ) << std::endl;
+		this->pilhaComandos.pop_back( );
+	}
+}
+
+void
+GeradorDeCodigo::atribuiLabel( std::string _nomeFuncao )
+{
+	this->indexLabel[_nomeFuncao] = "LBC" + itos(this->contadorLabel);
+
+	this->ultimosLabelsInseridos.push_back( "LBC" + itos(this->contadorLabel) );
+
+	++this->contadorLabel;
+}
+
+void
+GeradorDeCodigo::insereLabelNada( )
+{
+	this->bufferComandos << this->ultimosLabelsInseridos.back( ) << " NADA" << std::endl;
+
+	this->ultimosLabelsInseridos.pop_back( );
 }
 
 void
@@ -137,7 +684,7 @@ GeradorDeCodigo::CRCT( int K )
 void
 GeradorDeCodigo::CRVL( int k, int n )
 {
-	this->bufferComandos << "CRVL " << k << " " << n << std::endl;
+	this->bufferComandos << "CRVL " << k << ", " << n << std::endl;
 }
 
 void
@@ -229,7 +776,7 @@ GeradorDeCodigo::INVR( )
 void
 GeradorDeCodigo::ARMZ( int k, int n )
 {
-	this->bufferComandos << "ARMZ" << k << " " << n << std::endl;
+	this->bufferComandos << "ARMZ " << k << ", " << n << std::endl;
 }
 
 void
@@ -301,24 +848,24 @@ GeradorDeCodigo::ENPR( int k )
 void
 GeradorDeCodigo::RTPR( int k, int n )
 {
-	this->bufferComandos << "RTPR " << k << " " << n << std::endl;
+	this->bufferComandos << "RTPR " << k << ", " << n << std::endl;
 }
 
 
 void
 GeradorDeCodigo::CRVI( int k, int n )
 {
-	this->bufferComandos << "CRVI " << k << " " << n << std::endl;
+	this->bufferComandos << "CRVI " << k << ", " << n << std::endl;
 }
 
 void
 GeradorDeCodigo::ARMI( int k, int n )
 {
-	this->bufferComandos << "ARMI " << k << " " << n << std::endl;
+	this->bufferComandos << "ARMI " << k << ", " << n << std::endl;
 }
 
 void
 GeradorDeCodigo::CREN( int k, int n )
 {
-	this->bufferComandos << "CREN " << k << " " << n << std::endl;
+	this->bufferComandos << "CREN " << k << ", " << n << std::endl;
 }

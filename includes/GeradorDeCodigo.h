@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <list>
+#include <map>
 #include <queue>
 #include <sstream>
 
@@ -26,9 +27,6 @@ class GeradorDeCodigo
 		NoArvoreSintatica*
 		raiz;
 
-		NoArvoreSintatica*
-		noCorrente;
-
 		std::string
 		nomePrograma;
 
@@ -38,6 +36,18 @@ class GeradorDeCodigo
 		std::list<std::string>
 		pilhaComandos;
 
+		unsigned int
+		nivelLexicoAtual;
+
+		std::map<std::string, std::string>
+		indexLabel;
+
+		unsigned int
+		contadorLabel;
+
+		std::vector<std::string>
+		ultimosLabelsInseridos;
+
 		void
 		salvaCodigoMepa( );
 
@@ -45,13 +55,73 @@ class GeradorDeCodigo
 		iniciaGeracaoDeCodigo( );
 
 		void
+		bloco( NoArvoreSintatica* );
+
+		void
+		declaracaoDeRotulos( NoArvoreSintatica* );
+
+		void
 		declaracaoDeVariaveis( NoArvoreSintatica* );
+
+		void
+		declaracaoDeSubrotinas( NoArvoreSintatica* );
+
+		void
+		comandoComposto( NoArvoreSintatica* );
+
+		void
+		comando( NoArvoreSintatica* );
+
+		void
+		comandoSemRotulo( NoArvoreSintatica* );
+
+		void
+		comandoRepetitivo( NoArvoreSintatica* );
+
+		void
+		comandoCondicional( NoArvoreSintatica* );
+
+		void
+		desvios( NoArvoreSintatica* );
+
+		void
+		comandoLeitura( NoArvoreSintatica* );
+
+		void
+		comandoEscrita( NoArvoreSintatica* );
+
+		void
+		atribuicao( NoArvoreSintatica* );
+
+		void
+		chamadaProcedimento( NoArvoreSintatica* );
+
+		void
+		expressao( NoArvoreSintatica* );
+
+		void
+		relacao( NoArvoreSintatica* );
+
+		void
+		expressaoSimples( NoArvoreSintatica* );
+
+		void
+		termo( NoArvoreSintatica* );
+
+		void
+		fator( NoArvoreSintatica* );
 
 		void
 		empilhaComando( std::string );
 
 		void
 		desempilhaComando( );
+
+		void
+		atribuiLabel( std::string );
+
+		void
+		insereLabelNada( );
 
 		void
 		CRCT( int );

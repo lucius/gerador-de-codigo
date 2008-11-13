@@ -43,6 +43,8 @@ GeradorDeCodigo::GeradorDeCodigo( std::pair<TabelaHash*, NoArvoreSintatica*> _sa
 	this->nivelLexicoAtual = 0;
 	this->contadorLabel = 1;
 
+	this->contadorLabelCR = 1;
+
 	this->atribuiLabel( "CorpoProgramaPrincipal" );
 
 	this->iniciaGeracaoDeCodigo( );
@@ -272,6 +274,24 @@ GeradorDeCodigo::comandoRepetitivo( NoArvoreSintatica* _comandoRepetitivo )
 {
 	std::vector<NoArvoreSintatica*>
 	_filhos = _comandoRepetitivo->getFilhos( );
+
+	this->ultimosLabelsInseridosCR.push_back( "CR" + itos(this->contadorLabelCR) );
+	++this->contadorLabelCR;
+	this->bufferComandos << this->ultimosLabelsInseridosCR.at( this->ultimosLabelsInseridosCR.size() - 1 ) << " NADA" << std::endl;
+
+	this->expressao( _filhos[1] );
+
+	this->ultimosLabelsInseridosCR.push_back( "CR" + itos(this->contadorLabelCR) );
+	++this->contadorLabelCR;
+	this->DSVF( this->ultimosLabelsInseridosCR.at( this->ultimosLabelsInseridosCR.size() - 1 ) );
+
+	this->comandoSemRotulo( _filhos[3] );
+
+	this->DSVS( this->ultimosLabelsInseridosCR.at( this->ultimosLabelsInseridosCR.size() - 2 ) );
+	this->bufferComandos << this->ultimosLabelsInseridosCR.at( this->ultimosLabelsInseridosCR.size() - 1 ) << " NADA" << std::endl;
+
+	this->ultimosLabelsInseridosCR.pop_back( );
+	this->ultimosLabelsInseridosCR.pop_back( );
 }
 
 void
@@ -452,6 +472,7 @@ GeradorDeCodigo::expressao( NoArvoreSintatica* _expressao )
 	{
 		this->relacao( _filhos[1] );
 		this->expressaoSimples( _filhos[2] );
+		this->desempilhaComando( );
 	}
 }
 
@@ -460,6 +481,31 @@ GeradorDeCodigo::relacao( NoArvoreSintatica* _relacao )
 {
 	std::vector<NoArvoreSintatica*>
 	_filhos = _relacao->getFilhos( );
+
+	if( _filhos[0]->getDescricao( ) == "=" )
+	{
+		this->empilhaComando( "CMIG" );
+	}
+	else if( _filhos[0]->getDescricao( ) == "<>" )
+	{
+		this->empilhaComando( "CMDG" );
+	}
+	else if( _filhos[0]->getDescricao( ) == "<" )
+	{
+		this->empilhaComando( "CMME" );
+	}
+	else if( _filhos[0]->getDescricao( ) == "<=" )
+	{
+		this->empilhaComando( "CMIG" );
+	}
+	else if( _filhos[0]->getDescricao( ) == ">" )
+	{
+		this->empilhaComando( "CMMA" );
+	}
+	else if( _filhos[0]->getDescricao( ) == ">=" )
+	{
+		this->empilhaComando( "CMAG" );
+	}
 }
 
 void

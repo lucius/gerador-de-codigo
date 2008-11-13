@@ -39,6 +39,9 @@ class GeradorDeCodigo
 		unsigned int
 		nivelLexicoAtual;
 
+		/*
+		 * Labels de Desvio Incondicional
+		 */
 		std::map<std::string, std::string>
 		indexLabel;
 
@@ -47,6 +50,15 @@ class GeradorDeCodigo
 
 		std::vector<std::string>
 		ultimosLabelsInseridos;
+
+		/*
+		 * Labels de Comandos Repetitivos
+		 */
+		unsigned int
+		contadorLabelCR;
+
+		std::vector<std::string>
+		ultimosLabelsInseridosCR;
 
 		void
 		salvaCodigoMepa( );

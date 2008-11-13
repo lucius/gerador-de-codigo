@@ -45,6 +45,8 @@ GeradorDeCodigo::GeradorDeCodigo( std::pair<TabelaHash*, NoArvoreSintatica*> _sa
 
 	this->contadorLabelCR = 1;
 
+	this->contadorLabelCC = 1;
+
 	this->atribuiLabel( "CorpoProgramaPrincipal" );
 
 	this->iniciaGeracaoDeCodigo( );
@@ -283,13 +285,16 @@ GeradorDeCodigo::comandoRepetitivo( NoArvoreSintatica* _comandoRepetitivo )
 
 	this->ultimosLabelsInseridosCR.push_back( "CR" + itos(this->contadorLabelCR) );
 	++this->contadorLabelCR;
-	this->DSVF( this->ultimosLabelsInseridosCR.at( this->ultimosLabelsInseridosCR.size() - 1 ) );
+	this->DSVF( this->ultimosLabelsInseridosCR.at(this->ultimosLabelsInseridosCR.size() - 1) );
 
 	this->comandoSemRotulo( _filhos[3] );
 
-	this->DSVS( this->ultimosLabelsInseridosCR.at( this->ultimosLabelsInseridosCR.size() - 2 ) );
+	this->DSVS( this->ultimosLabelsInseridosCR.at(this->ultimosLabelsInseridosCR.size() - 2) );
 	this->bufferComandos << this->ultimosLabelsInseridosCR.at( this->ultimosLabelsInseridosCR.size() - 1 ) << " NADA" << std::endl;
 
+	/*
+	 * Consertar Aqui: Eliminar duplicidade de POPs
+	 */
 	this->ultimosLabelsInseridosCR.pop_back( );
 	this->ultimosLabelsInseridosCR.pop_back( );
 }
@@ -299,6 +304,33 @@ GeradorDeCodigo::comandoCondicional( NoArvoreSintatica* _comandoCondicional )
 {
 	std::vector<NoArvoreSintatica*>
 	_filhos = _comandoCondicional->getFilhos( );
+
+	this->ultimosLabelsInseridosCC.push_back( "CC" + itos(this->contadorLabelCC) );
+	++this->contadorLabelCC;
+
+	this->expressao( _filhos[1] );
+	this->DSVF( this->ultimosLabelsInseridosCC.at(this->ultimosLabelsInseridosCC.size() - 1) );
+
+	this->comandoSemRotulo( _filhos[3] );
+
+	this->ultimosLabelsInseridosCC.push_back( "CC" + itos(this->contadorLabelCC) );
+	++this->contadorLabelCC;
+	this->DSVS( this->ultimosLabelsInseridosCC.at(this->ultimosLabelsInseridosCC.size() - 1) );
+
+	this->bufferComandos << this->ultimosLabelsInseridosCC.at( this->ultimosLabelsInseridosCC.size() - 2 ) << " NADA" << std::endl;
+
+	if( _filhos.size() > 4 )
+	{
+		this->comandoSemRotulo( _filhos[5] );
+	}
+
+	this->bufferComandos << this->ultimosLabelsInseridosCC.at( this->ultimosLabelsInseridosCC.size() - 1 ) << " NADA" << std::endl;
+
+	/*
+	 * Consertar Aqui: Eliminar duplicidade de POPs
+	 */
+	this->ultimosLabelsInseridosCC.pop_back( );
+	this->ultimosLabelsInseridosCC.pop_back( );
 }
 
 void
@@ -458,6 +490,8 @@ GeradorDeCodigo::chamadaProcedimento( NoArvoreSintatica* _chamadaProcedimento )
 {
 	std::vector<NoArvoreSintatica*>
 	_filhos = _chamadaProcedimento->getFilhos( );
+
+
 }
 
 void
@@ -496,7 +530,7 @@ GeradorDeCodigo::relacao( NoArvoreSintatica* _relacao )
 	}
 	else if( _filhos[0]->getDescricao( ) == "<=" )
 	{
-		this->empilhaComando( "CMIG" );
+		this->empilhaComando( "CMEG" );
 	}
 	else if( _filhos[0]->getDescricao( ) == ">" )
 	{
@@ -637,6 +671,7 @@ GeradorDeCodigo::fator( NoArvoreSintatica* _fator )
 	if( _filhos[0]->getDescricao() == "not")
 	{
 		this->fator( _filhos[1] );
+		this->NEGA( );
 	}
 	else if( _filhos[0]->getDescricao() == "(" )
 	{

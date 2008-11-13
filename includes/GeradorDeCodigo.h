@@ -60,6 +60,15 @@ class GeradorDeCodigo
 		std::vector<std::string>
 		ultimosLabelsInseridosCR;
 
+		/*
+		 * Labels de Comandos Repetitivos
+		 */
+		unsigned int
+		contadorLabelCC;
+
+		std::vector<std::string>
+		ultimosLabelsInseridosCC;
+
 		void
 		salvaCodigoMepa( );
 

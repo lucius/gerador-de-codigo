@@ -1254,7 +1254,10 @@ AnalisadorSintatico::comandoComposto( )
 			_comandoComposto->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
 			++this->iteradorSaidaAnalisadorLexico;
 
-			_comandoComposto->insereFilho( this->comando() );
+			if( this->iteradorSaidaAnalisadorLexico->second.token != "end" )
+			{
+				_comandoComposto->insereFilho( this->comando() );
+			}
 		}
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == "end" )

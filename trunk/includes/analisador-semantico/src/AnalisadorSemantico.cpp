@@ -10,7 +10,7 @@ AnalisadorSemantico::AnalisadorSemantico( std::pair<TabelaHash*, NoArvoreSintati
 
 	this->nivelLexicoAtual = 0;
 
-	this->analise( this->raiz );
+//	this->analise( this->raiz );
 }
 
 AnalisadorSemantico::~AnalisadorSemantico( )

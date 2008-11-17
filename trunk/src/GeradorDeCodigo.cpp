@@ -129,6 +129,9 @@ GeradorDeCodigo::bloco( NoArvoreSintatica* _bloco )
 	std::vector<NoArvoreSintatica*>::iterator
 	_iteradorFilhos;
 
+	bool
+	_parteDeclaracoesVariaveis = false;
+
 	for( _iteradorFilhos = _filhos.begin(); _iteradorFilhos != _filhos.end(); ++_iteradorFilhos )
 	{
 
@@ -139,15 +142,22 @@ GeradorDeCodigo::bloco( NoArvoreSintatica* _bloco )
 		else if( (*_iteradorFilhos)->getDescricao() == "<PARTE_DECLARACOES_VARIAVEIS>" )
 		{
 			this->declaracaoDeVariaveis( *_iteradorFilhos );
-
-			this->DSVS( this->ultimosLabelsInseridos.back() );
 		}
 		else if( (*_iteradorFilhos)->getDescricao() == "<PARTE_DECLARACOES_SUB_ROTINAS>" )
 		{
+			this->DSVS( this->ultimosLabelsInseridos.back() );
+			_parteDeclaracoesVariaveis = true;
+
 			this->declaracaoDeSubrotinas( *_iteradorFilhos );
 		}
 		else if( (*_iteradorFilhos)->getDescricao() == "<COMANDO_COMPOSTO>" )
 		{
+			if( !_parteDeclaracoesVariaveis )
+			{
+				this->DSVS( this->ultimosLabelsInseridos.back() );
+				_parteDeclaracoesVariaveis = true;
+			}
+
 			this->insereLabelNada( );
 			this->comandoComposto( *_iteradorFilhos );
 		}
@@ -188,6 +198,70 @@ GeradorDeCodigo::declaracaoDeSubrotinas( NoArvoreSintatica* _parteDeclaracoesSub
 {
 	std::vector<NoArvoreSintatica*>
 	_filhos = _parteDeclaracoesSubrotinas->getFilhos( );
+
+	std::vector<NoArvoreSintatica*>::iterator
+	_iteradorFilhos;
+
+	std::string
+	_descricao;
+
+	for( _iteradorFilhos = _filhos.begin(); _iteradorFilhos != _filhos.end(); ++_iteradorFilhos)
+	{
+		if( (*_iteradorFilhos)->getDescricao() == "<DECLARACAO_FUNCAO>" )
+		{
+			_descricao = (*_iteradorFilhos)->getFilhos( )[1]->getFilhos( )[0]->getDescricao( );
+			this->atribuiLabel( _descricao );
+			this->insereLabelNada( );
+
+			this->ENPR( ++this->nivelLexicoAtual );
+
+			_descricao.append( "Corpo" );
+			this->atribuiLabel( _descricao );
+
+			this->bloco( (*_iteradorFilhos)->getFilhos()[6] );
+
+			if( (*_iteradorFilhos)->getFilhos()[6]->getFilhos()[0]->getDescricao() == "<PARTE_DECLARACOES_VARIAVEIS>")
+			{
+				this->desempilhaComando( );
+			}
+
+			this->RTPR( this->nivelLexicoAtual, this->hash[std::pair<const std::string, const unsigned int>((*_iteradorFilhos)->getFilhos()[1]->getFilhos()[0]->getDescricao(), this->nivelLexicoAtual)]->second->procedureFunction->quantidadeParametros );
+			--this->nivelLexicoAtual;
+		}
+		else if( (*_iteradorFilhos)->getDescricao() == "<DECLARACAO_PROCEDIMENTO>" )
+		{
+			_descricao = (*_iteradorFilhos)->getFilhos( )[1]->getFilhos( )[0]->getDescricao( );
+			this->atribuiLabel( _descricao );
+			this->insereLabelNada( );
+
+			this->ENPR( ++this->nivelLexicoAtual );
+
+			_descricao.append( "Corpo" );
+			this->atribuiLabel( _descricao );
+
+			if( (*_iteradorFilhos)->getFilhos()[2]->getDescricao() == "<PARAMETROS_FORMAIS>" )
+			{
+				this->bloco( (*_iteradorFilhos)->getFilhos()[4] );
+
+				if( (*_iteradorFilhos)->getFilhos()[2]->getFilhos()[0]->getDescricao() == "<PARTE_DECLARACOES_VARIAVEIS>")
+				{
+					this->desempilhaComando( );
+				}
+			}
+			else
+			{
+				this->bloco( (*_iteradorFilhos)->getFilhos()[3] );
+
+				if( (*_iteradorFilhos)->getFilhos()[3]->getFilhos()[0]->getDescricao() == "<PARTE_DECLARACOES_VARIAVEIS>")
+				{
+					this->desempilhaComando( );
+				}
+			}
+
+			this->RTPR( this->nivelLexicoAtual, this->hash[std::pair<const std::string, const unsigned int>((*_iteradorFilhos)->getFilhos()[1]->getFilhos()[0]->getDescricao(), this->nivelLexicoAtual)]->second->procedureFunction->quantidadeParametros );
+			--this->nivelLexicoAtual;
+		}
+	}
 }
 
 void
@@ -395,13 +469,13 @@ GeradorDeCodigo::comandoLeitura( NoArvoreSintatica* _comandoLeitura )
 				{
 					this->LEIT( );
 
-					this->ARMZ( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
+					this->ARMZ( _resultadoBusca->second->parametrosFormais->nivelLexico, _resultadoBusca->second->parametrosFormais->deslocamento );
 				}
 				else if( _resultadoBusca->second->parametrosFormais->passagem == true )
 				{
 					this->LEIT( );
 
-					this->ARMI( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
+					this->ARMI( _resultadoBusca->second->parametrosFormais->nivelLexico, _resultadoBusca->second->parametrosFormais->deslocamento );
 				}
 			}
 
@@ -447,6 +521,7 @@ GeradorDeCodigo::atribuicao( NoArvoreSintatica* _atribuicao )
 	std::string
 	_descricao = _filhos[0]->getFilhos()[0]->getFilhos()[0]->getDescricao();
 
+
 	/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
 	 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
 	 */
@@ -462,27 +537,135 @@ GeradorDeCodigo::atribuicao( NoArvoreSintatica* _atribuicao )
 		}
 	}
 
-	this->expressao( _filhos[2] );
+	if( _resultadoBusca != this->hash.end() )
+	{
+		this->expressao( _filhos[2] );
 
-	if( _classificacao == "variavel" )
-	{
-		this->ARMZ( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
-	}
-	else if( _classificacao == "parametrosFormais" )
-	{
-		if( _resultadoBusca->second->parametrosFormais->passagem == false )
+		if( _classificacao == "variavel" )
 		{
 			this->ARMZ( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
 		}
-		else if( _resultadoBusca->second->parametrosFormais->passagem == true )
+		else if( _classificacao == "parametrosFormais" )
 		{
-			this->ARMI( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
+			if( _resultadoBusca->second->parametrosFormais->passagem == false )
+			{
+				this->ARMZ( _resultadoBusca->second->parametrosFormais->nivelLexico, _resultadoBusca->second->parametrosFormais->deslocamento );
+			}
+			else if( _resultadoBusca->second->parametrosFormais->passagem == true )
+			{
+				this->ARMI( _resultadoBusca->second->parametrosFormais->nivelLexico, _resultadoBusca->second->parametrosFormais->deslocamento );
+			}
+		}
+		else if( _classificacao == "procedimento|funcao" )
+		{
+			this->ARMZ( _resultadoBusca->second->procedureFunction->nivelLexico, _resultadoBusca->second->procedureFunction->deslocamento );
 		}
 	}
-	else if( _classificacao == "procedimento|funcao" )
-	{
+}
 
+void
+GeradorDeCodigo::chamadaFuncao( NoArvoreSintatica* _chamadaFuncao )
+{
+	std::vector<NoArvoreSintatica*>
+	_filhos = _chamadaFuncao->getFilhos( );
+
+	std::vector<NoArvoreSintatica*>
+	_listaExpressoes;
+
+	TabelaHash::iterator
+	_resultadoBusca;
+
+	TabelaHash::iterator
+	_resultadoBuscaParametro;
+
+	unsigned int
+	_contador;
+
+	std::string
+	_identificadorVariavel;
+
+	std::string
+	_descricao = _filhos[0]->getFilhos( )[0]->getDescricao( );
+
+	std::string
+	_tipoParametro;
+
+	unsigned int
+	_quantidadeParametros;
+
+	bool
+	_encontrado = false;
+
+	std::cout << _descricao;
+	/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
+	 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
+	 */
+	for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
+	{
+		if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
+		{
+			_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
+
+			_encontrado = true;
+			break;
+		}
 	}
+
+	if( !_encontrado )
+	{
+		if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)] != this->hash.end() )
+		{
+			_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)];
+
+			_encontrado = true;
+		}
+	}
+
+	this->AMEM( 1 );
+
+	_quantidadeParametros = _resultadoBusca->second->procedureFunction->quantidadeParametros;
+
+	if( _quantidadeParametros != 0 )
+	{
+		_listaExpressoes = _filhos[2]->getFilhos( );
+	}
+
+	for( _contador = 0; _contador < _listaExpressoes.size(); _contador += 2 )
+	{
+		if( _resultadoBusca->second->procedureFunction->parametros[_contador/2] == false )
+		{
+			this->expressao( _listaExpressoes[_contador] );
+		}
+		else
+		{
+			_identificadorVariavel = _listaExpressoes[_contador]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getDescricao( );
+
+			_resultadoBuscaParametro = this->hash[std::pair<const std::string, const unsigned int>(_identificadorVariavel, this->nivelLexicoAtual)];
+
+			if( _resultadoBuscaParametro != this->hash.end() )
+			{
+				_tipoParametro = _resultadoBuscaParametro->second->getConteudo( );
+
+				if( _tipoParametro == "parametrosFormais")
+				{
+					if( _resultadoBuscaParametro->second->parametrosFormais->passagem == true )
+					{
+						this->CRVL( _resultadoBuscaParametro->second->variavel->nivelLexico, _resultadoBuscaParametro->second->variavel->deslocamento );
+					}
+					else
+					{
+						this->CREN( _resultadoBuscaParametro->second->variavel->nivelLexico, _resultadoBuscaParametro->second->variavel->deslocamento );
+					}
+				}
+				else
+				{
+					this->CREN( _resultadoBuscaParametro->second->variavel->nivelLexico, _resultadoBuscaParametro->second->variavel->deslocamento );
+				}
+			}
+		}
+	}
+
+	this->CHPR( this->indexLabel[_descricao] );
 }
 
 void
@@ -491,7 +674,101 @@ GeradorDeCodigo::chamadaProcedimento( NoArvoreSintatica* _chamadaProcedimento )
 	std::vector<NoArvoreSintatica*>
 	_filhos = _chamadaProcedimento->getFilhos( );
 
+	std::vector<NoArvoreSintatica*>
+	_listaExpressoes;
 
+	TabelaHash::iterator
+	_resultadoBusca;
+
+	TabelaHash::iterator
+	_resultadoBuscaParametro;
+
+	unsigned int
+	_contador;
+
+	std::string
+	_identificadorVariavel;
+
+	std::string
+	_descricao = _filhos[0]->getFilhos( )[0]->getDescricao( );
+
+	std::string
+	_tipoParametro;
+
+	unsigned int
+	_quantidadeParametros;
+
+	bool
+	_encontrado = false;
+
+	/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
+	 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
+	 */
+	for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
+	{
+		if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
+		{
+			_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
+
+			_encontrado = true;
+			break;
+		}
+	}
+
+	if( !_encontrado )
+	{
+		if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)] != this->hash.end() )
+		{
+			_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)];
+
+			_encontrado = true;
+		}
+	}
+
+
+	_quantidadeParametros = _resultadoBusca->second->procedureFunction->quantidadeParametros;
+
+	if( _quantidadeParametros != 0 )
+	{
+		_listaExpressoes = _filhos[2]->getFilhos( );
+	}
+
+	for( _contador = 0; _contador < _listaExpressoes.size(); _contador += 2 )
+	{
+		if( _resultadoBusca->second->procedureFunction->parametros[_contador/2] == false )
+		{
+			this->expressao( _listaExpressoes[_contador] );
+		}
+		else
+		{
+			_identificadorVariavel = _listaExpressoes[_contador]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getDescricao( );
+
+			_resultadoBuscaParametro = this->hash[std::pair<const std::string, const unsigned int>(_identificadorVariavel, this->nivelLexicoAtual)];
+
+			if( _resultadoBuscaParametro != this->hash.end() )
+			{
+				_tipoParametro = _resultadoBuscaParametro->second->getConteudo( );
+
+				if( _tipoParametro == "parametrosFormais")
+				{
+					if( _resultadoBuscaParametro->second->parametrosFormais->passagem == true )
+					{
+						this->CRVL( _resultadoBuscaParametro->second->variavel->nivelLexico, _resultadoBuscaParametro->second->variavel->deslocamento );
+					}
+					else
+					{
+						this->CREN( _resultadoBuscaParametro->second->variavel->nivelLexico, _resultadoBuscaParametro->second->variavel->deslocamento );
+					}
+				}
+				else
+				{
+					this->CREN( _resultadoBuscaParametro->second->variavel->nivelLexico, _resultadoBuscaParametro->second->variavel->deslocamento );
+				}
+			}
+		}
+	}
+
+	this->CHPR( this->indexLabel[_descricao] );
 }
 
 void
@@ -667,6 +944,8 @@ GeradorDeCodigo::fator( NoArvoreSintatica* _fator )
 	std::string
 	_descricao;
 
+	bool
+	_encontrado = false;
 
 	if( _filhos[0]->getDescricao() == "not")
 	{
@@ -693,10 +972,23 @@ GeradorDeCodigo::fator( NoArvoreSintatica* _fator )
 			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
 			{
 				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
-
 				_classificacao = _resultadoBusca->second->getConteudo();
 
+				_encontrado = true;
 				break;
+			}
+		}
+
+		if( !_encontrado )
+		{
+			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)] != this->hash.end() )
+			{
+				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)];
+				_classificacao = _resultadoBusca->second->getConteudo();
+
+				this->chamadaFuncao( _filhos[0] );
+
+				_encontrado = true;
 			}
 		}
 
@@ -708,16 +1000,53 @@ GeradorDeCodigo::fator( NoArvoreSintatica* _fator )
 		{
 			if( _resultadoBusca->second->parametrosFormais->passagem == false )
 			{
-				this->CRVL( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
+				this->CRVL( _resultadoBusca->second->parametrosFormais->nivelLexico, _resultadoBusca->second->parametrosFormais->deslocamento );
 			}
 			else if( _resultadoBusca->second->parametrosFormais->passagem == true )
 			{
-				this->CRVI( _resultadoBusca->second->variavel->nivelLexico, _resultadoBusca->second->variavel->deslocamento );
+				this->CRVI( _resultadoBusca->second->parametrosFormais->nivelLexico, _resultadoBusca->second->parametrosFormais->deslocamento );
 			}
 		}
 		else if( _classificacao == "procedimento|funcao" )
 		{
+			this->chamadaFuncao( _filhos[0] );
+		}
+	}
+	else if( _filhos[0]->getDescricao() == "<CHAMADA_FUNCAO>" )
+	{
+		_descricao = _filhos[0]->getFilhos()[0]->getFilhos()[0]->getDescricao();
 
+		/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
+		 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
+		 */
+		for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
+		{
+			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
+			{
+				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
+				_classificacao = _resultadoBusca->second->getConteudo();
+
+				_encontrado = true;
+				break;
+			}
+		}
+
+		if( !_encontrado )
+		{
+			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)] != this->hash.end() )
+			{
+				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)];
+				_classificacao = _resultadoBusca->second->getConteudo();
+
+				this->chamadaFuncao( _filhos[0] );
+
+				_encontrado = true;
+			}
+		}
+
+		if( _classificacao == "procedimento|funcao" )
+		{
+			this->chamadaFuncao( _filhos[0] );
 		}
 	}
 }

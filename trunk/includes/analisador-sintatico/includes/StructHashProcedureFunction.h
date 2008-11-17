@@ -1,6 +1,9 @@
 #ifndef STRUCTHASHPROCEDUREFUNCTION_H_
 #define STRUCTHASHPROCEDUREFUNCTION_H_
 
+#include <iostream>
+#include <vector>
+
 typedef struct StructHashProcedureFunction
 {
 	std::string
@@ -23,6 +26,9 @@ typedef struct StructHashProcedureFunction
 
 	unsigned int
 	quantidadeParametros;
+
+	std::vector<bool>
+	parametros;
 };
 
 

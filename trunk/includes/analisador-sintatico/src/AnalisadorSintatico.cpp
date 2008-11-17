@@ -122,6 +122,9 @@ AnalisadorSintatico::insereParametrosFormaisNaHash( )
 	std::string
 	_conteudo;
 
+	std::vector<bool>
+	_parametros;
+
 	for( _it = this->listaVariaveis.rbegin(); _it != this->listaVariaveis.rend(); ++_it )
 	{
 		_conteudo = _it->getConteudo( );
@@ -155,6 +158,8 @@ AnalisadorSintatico::insereParametrosFormaisNaHash( )
 																		 _it->parametrosFormais->tipo,
 																		 _deslocamento,
 																		 _it->parametrosFormais->passagem)) );
+
+				_parametros.insert(_parametros.begin(), _it->parametrosFormais->passagem );
 				++_contador;
 			}
 			else
@@ -166,6 +171,7 @@ AnalisadorSintatico::insereParametrosFormaisNaHash( )
 	}
 
 	this->hash[std::pair<const std::string, const unsigned int>(_ultimaEntrada,this->nivelLexicoAtual)]->second->procedureFunction->quantidadeParametros = _contador;
+	this->hash[std::pair<const std::string, const unsigned int>(_ultimaEntrada,this->nivelLexicoAtual)]->second->procedureFunction->parametros = _parametros;
 
 	this->listaVariaveis.clear( );
 }
@@ -922,7 +928,6 @@ AnalisadorSintatico::declaracaoProcedimento( )
 										  0 );
 
 			this->listaVariaveis.push_back( *_insercao );
-//			delete _insercao;
 
 			_declaracaoProcedimento->insereFilho( this->identificador() );
 

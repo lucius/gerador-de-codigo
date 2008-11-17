@@ -115,6 +115,9 @@ class GeradorDeCodigo
 		atribuicao( NoArvoreSintatica* );
 
 		void
+		chamadaFuncao( NoArvoreSintatica* );
+
+		void
 		chamadaProcedimento( NoArvoreSintatica* );
 
 		void

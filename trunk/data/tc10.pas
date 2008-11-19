@@ -18,10 +18,10 @@ function f01(p01:integer):integer;
 									f09:=f10(10)
 								end
 							begin
-								f08:=f08(09)
+								f08:=f09(09)
 							end
 						begin
-							f07:=f07(08)
+							f07:=f08(08)
 						end
 					begin
 						f06:=f07(07)

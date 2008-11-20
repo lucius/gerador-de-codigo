@@ -122,7 +122,7 @@ AnalisadorSintatico::insereParametrosFormaisNaHash( )
 	std::string
 	_conteudo;
 
-	std::vector<bool>
+	std::vector< std::pair<bool, std::string> >
 	_parametros;
 
 	for( _it = this->listaVariaveis.rbegin(); _it != this->listaVariaveis.rend(); ++_it )
@@ -159,7 +159,7 @@ AnalisadorSintatico::insereParametrosFormaisNaHash( )
 																		 _deslocamento,
 																		 _it->parametrosFormais->passagem)) );
 
-				_parametros.insert(_parametros.begin(), _it->parametrosFormais->passagem );
+				_parametros.insert(_parametros.begin(), std::pair<bool, std::string>(_it->parametrosFormais->passagem, _it->parametrosFormais->tipo) );
 				++_contador;
 			}
 			else

@@ -596,28 +596,28 @@ GeradorDeCodigo::chamadaFuncao( NoArvoreSintatica* _chamadaFuncao )
 	bool
 	_encontrado = false;
 
-	std::cout << _descricao;
+
+	if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)] != this->hash.end() )
+	{
+		_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)];
+
+		_encontrado = true;
+	}
 	/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
 	 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
 	 */
-	for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
-	{
-		if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
-		{
-			_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
-
-			_encontrado = true;
-			break;
-		}
-	}
 
 	if( !_encontrado )
 	{
-		if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)] != this->hash.end() )
+		for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
 		{
-			_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)];
+			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
+			{
+				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
 
-			_encontrado = true;
+				_encontrado = true;
+				break;
+			}
 		}
 	}
 
@@ -632,7 +632,7 @@ GeradorDeCodigo::chamadaFuncao( NoArvoreSintatica* _chamadaFuncao )
 
 	for( _contador = 0; _contador < _listaExpressoes.size(); _contador += 2 )
 	{
-		if( _resultadoBusca->second->procedureFunction->parametros[_contador/2] == false )
+		if( _resultadoBusca->second->procedureFunction->parametros[_contador/2].first == false )
 		{
 			this->expressao( _listaExpressoes[_contador] );
 		}
@@ -704,24 +704,25 @@ GeradorDeCodigo::chamadaProcedimento( NoArvoreSintatica* _chamadaProcedimento )
 	/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
 	 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
 	 */
-	for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
-	{
-		if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
-		{
-			_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
 
-			_encontrado = true;
-			break;
-		}
+	if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)] != this->hash.end() )
+	{
+		_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)];
+
+		_encontrado = true;
 	}
 
 	if( !_encontrado )
 	{
-		if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)] != this->hash.end() )
+		for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
 		{
-			_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)];
+			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
+			{
+				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
 
-			_encontrado = true;
+				_encontrado = true;
+				break;
+			}
 		}
 	}
 
@@ -735,7 +736,7 @@ GeradorDeCodigo::chamadaProcedimento( NoArvoreSintatica* _chamadaProcedimento )
 
 	for( _contador = 0; _contador < _listaExpressoes.size(); _contador += 2 )
 	{
-		if( _resultadoBusca->second->procedureFunction->parametros[_contador/2] == false )
+		if( _resultadoBusca->second->procedureFunction->parametros[_contador/2].first == false )
 		{
 			this->expressao( _listaExpressoes[_contador] );
 		}
@@ -986,8 +987,6 @@ GeradorDeCodigo::fator( NoArvoreSintatica* _fator )
 				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)];
 				_classificacao = _resultadoBusca->second->getConteudo();
 
-				this->chamadaFuncao( _filhos[0] );
-
 				_encontrado = true;
 			}
 		}
@@ -1007,47 +1006,10 @@ GeradorDeCodigo::fator( NoArvoreSintatica* _fator )
 				this->CRVI( _resultadoBusca->second->parametrosFormais->nivelLexico, _resultadoBusca->second->parametrosFormais->deslocamento );
 			}
 		}
-		else if( _classificacao == "procedimento|funcao" )
-		{
-			this->chamadaFuncao( _filhos[0] );
-		}
 	}
 	else if( _filhos[0]->getDescricao() == "<CHAMADA_FUNCAO>" )
 	{
-		_descricao = _filhos[0]->getFilhos()[0]->getFilhos()[0]->getDescricao();
-
-		/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
-		 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
-		 */
-		for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
-		{
-			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
-			{
-				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
-				_classificacao = _resultadoBusca->second->getConteudo();
-
-				_encontrado = true;
-				break;
-			}
-		}
-
-		if( !_encontrado )
-		{
-			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)] != this->hash.end() )
-			{
-				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)];
-				_classificacao = _resultadoBusca->second->getConteudo();
-
-				this->chamadaFuncao( _filhos[0] );
-
-				_encontrado = true;
-			}
-		}
-
-		if( _classificacao == "procedimento|funcao" )
-		{
-			this->chamadaFuncao( _filhos[0] );
-		}
+		this->chamadaFuncao( _filhos[0] );
 	}
 }
 

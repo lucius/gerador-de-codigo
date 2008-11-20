@@ -27,7 +27,7 @@ typedef struct StructHashProcedureFunction
 	unsigned int
 	quantidadeParametros;
 
-	std::vector<bool>
+	std::vector< std::pair<bool, std::string> >
 	parametros;
 };
 

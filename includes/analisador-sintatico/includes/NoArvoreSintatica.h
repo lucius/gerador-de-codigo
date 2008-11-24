@@ -10,7 +10,7 @@
 class NoArvoreSintatica
 {
 	public:
-		NoArvoreSintatica( const std::string, const int, const bool );
+		NoArvoreSintatica( const std::string, const int, const bool, const unsigned int );
 
 		virtual
 		~NoArvoreSintatica( );
@@ -23,6 +23,9 @@ class NoArvoreSintatica
 
 		const int
 		getNivelLexico( );
+
+		const int
+		getLinha( );
 
 		const bool
 		getIsTerminal( );
@@ -37,10 +40,13 @@ class NoArvoreSintatica
 		setNivelLexico( const int );
 
 		void
+		setLinha( const unsigned int );
+
+		void
 		setIsTerminal( const bool );
 
 		void
-		insereFilho( const std::string, const int, const bool );
+		insereFilho( const std::string, const int, const bool, const unsigned int );
 
 		void
 		insereFilho( NoArvoreSintatica* );
@@ -56,6 +62,9 @@ class NoArvoreSintatica
 
 		int
 		nivelLexico;
+
+		unsigned int
+		linha;
 
 		bool
 		isTerminal;

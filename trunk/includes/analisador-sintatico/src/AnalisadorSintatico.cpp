@@ -320,11 +320,11 @@ NoArvoreSintatica*
 AnalisadorSintatico::programa( )
 {
 	NoArvoreSintatica*
-	_programa = new NoArvoreSintatica( "<PROGRAMA>", this->nivelLexicoAtual, false );
+	_programa = new NoArvoreSintatica( "<PROGRAMA>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if ( this->iteradorSaidaAnalisadorLexico->second.token == "program")
 	{
-		_programa->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_programa->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha );
 		++this->iteradorSaidaAnalisadorLexico;
 
 		if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
@@ -333,7 +333,7 @@ AnalisadorSintatico::programa( )
 
 			if ( this->iteradorSaidaAnalisadorLexico->second.token == "(" )
 			{
-				_programa->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_programa->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha );
 				++this->iteradorSaidaAnalisadorLexico;
 
 				if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
@@ -343,19 +343,19 @@ AnalisadorSintatico::programa( )
 
 				if ( this->iteradorSaidaAnalisadorLexico->second.token == ")" )
 				{
-					_programa->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+					_programa->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha );
 					++this->iteradorSaidaAnalisadorLexico;
 
 					if( this->iteradorSaidaAnalisadorLexico->second.token == ";" )
 					{
-						_programa->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+						_programa->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha );
 						++this->iteradorSaidaAnalisadorLexico;
 
 						_programa->insereFilho( this->bloco() );
 
 						if( this->iteradorSaidaAnalisadorLexico->second.token == "." )
 						{
-							_programa->insereFilho(  this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+							_programa->insereFilho(  this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha );
 							++this->iteradorSaidaAnalisadorLexico;
 						}
 						else
@@ -395,7 +395,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::bloco( )
 {
 	NoArvoreSintatica*
-	_bloco = new NoArvoreSintatica( "<BLOCO>", this->nivelLexicoAtual, false );
+	_bloco = new NoArvoreSintatica( "<BLOCO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	/*
 	 * PARTES NÃO OBRIGATORIAS
@@ -424,11 +424,11 @@ NoArvoreSintatica*
 AnalisadorSintatico::parteDeclaracoesRotulos( )
 {
 	NoArvoreSintatica*
-	_parteDeclaracoesRotulos = new NoArvoreSintatica( "<PARTE_DECLARACOES_ROTULOS>", this->nivelLexicoAtual, false );
+	_parteDeclaracoesRotulos = new NoArvoreSintatica( "<PARTE_DECLARACOES_ROTULOS>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.token == "label" )
 	{
-		_parteDeclaracoesRotulos->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_parteDeclaracoesRotulos->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "NUMERO" )
@@ -437,7 +437,7 @@ AnalisadorSintatico::parteDeclaracoesRotulos( )
 
 			while( this->iteradorSaidaAnalisadorLexico->second.token == "," )
 			{
-				_parteDeclaracoesRotulos->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_parteDeclaracoesRotulos->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 
 				if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "NUMERO" )
@@ -452,7 +452,7 @@ AnalisadorSintatico::parteDeclaracoesRotulos( )
 
 			if( this->iteradorSaidaAnalisadorLexico->second.token == ";" )
 			{
-				_parteDeclaracoesRotulos->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_parteDeclaracoesRotulos->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 			}
 			else
@@ -477,11 +477,11 @@ NoArvoreSintatica*
 AnalisadorSintatico::parteDefinicoesTipos( )
 {
 	NoArvoreSintatica*
-	_parteDefinicoesTipos = new NoArvoreSintatica( "<PARTE_DEFINICOES_TIPOS>", this->nivelLexicoAtual, false );
+	_parteDefinicoesTipos = new NoArvoreSintatica( "<PARTE_DEFINICOES_TIPOS>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.token == "type" )
 	{
-		_parteDefinicoesTipos->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_parteDefinicoesTipos->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		if( this->iteradorSaidaAnalisadorLexico->second.classificacao != "IDENTIFICADOR" )
@@ -494,7 +494,7 @@ AnalisadorSintatico::parteDefinicoesTipos( )
 
 			if( this->iteradorSaidaAnalisadorLexico->second.token == ";" )
 			{
-				 _parteDefinicoesTipos->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				 _parteDefinicoesTipos->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				 ++this->iteradorSaidaAnalisadorLexico;
 			}
 			else
@@ -515,7 +515,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::definicaoTipo()
 {
 	NoArvoreSintatica*
-	_definicaoTipo = new NoArvoreSintatica( "<DEFINICAO_TIPO>", this->nivelLexicoAtual, false );
+	_definicaoTipo = new NoArvoreSintatica( "<DEFINICAO_TIPO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
 	{
@@ -523,7 +523,7 @@ AnalisadorSintatico::definicaoTipo()
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == "=" )
 		{
-			_definicaoTipo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_definicaoTipo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 
 			if( (this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR") ||
@@ -553,7 +553,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::tipo( )
 {
 	NoArvoreSintatica*
-	_tipo = new NoArvoreSintatica( "<TIPO>", this->nivelLexicoAtual, false);
+	_tipo = new NoArvoreSintatica( "<TIPO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
 	{
@@ -561,19 +561,19 @@ AnalisadorSintatico::tipo( )
 	}
 	else if( this->iteradorSaidaAnalisadorLexico->second.token == "array" )
 	{
-		_tipo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_tipo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == "[" )
 		{
-			_tipo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_tipo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 
 			_tipo->insereFilho( this->indice() );
 
 			while( this->iteradorSaidaAnalisadorLexico->second.token == "," )
 			{
-				_tipo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_tipo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 
 				_tipo->insereFilho( this->indice() );
@@ -581,12 +581,12 @@ AnalisadorSintatico::tipo( )
 
 			if( this->iteradorSaidaAnalisadorLexico->second.token == "]" )
 			{
-				_tipo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_tipo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 
 				if( this->iteradorSaidaAnalisadorLexico->second.token == "of" )
 				{
-					_tipo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+					_tipo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 					++this->iteradorSaidaAnalisadorLexico;
 
 					if( (this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR") ||
@@ -624,7 +624,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::indice( )
 {
 	NoArvoreSintatica*
-	_indice = new NoArvoreSintatica( "<INDICE>", this->nivelLexicoAtual, false );
+	_indice = new NoArvoreSintatica( "<INDICE>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "NUMERO" )
 	{
@@ -632,12 +632,12 @@ AnalisadorSintatico::indice( )
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == "." )
 		{
-			_indice->insereFilho(this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_indice->insereFilho(this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha );
 			++this->iteradorSaidaAnalisadorLexico;
 
 			if( this->iteradorSaidaAnalisadorLexico->second.token == "." )
 			{
-				_indice->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_indice->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 
 				if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "NUMERO" )
@@ -671,11 +671,11 @@ NoArvoreSintatica*
 AnalisadorSintatico::parteDeclaracoesVariaveis( )
 {
 	NoArvoreSintatica*
-	_parteDeclaracoesVariaveis = new NoArvoreSintatica( "<PARTE_DECLARACOES_VARIAVEIS>", this->nivelLexicoAtual, false );
+	_parteDeclaracoesVariaveis = new NoArvoreSintatica( "<PARTE_DECLARACOES_VARIAVEIS>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.token == "var" )
 	{
-		_parteDeclaracoesVariaveis->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_parteDeclaracoesVariaveis->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		if( this->iteradorSaidaAnalisadorLexico->second.classificacao != "IDENTIFICADOR" )
@@ -688,7 +688,7 @@ AnalisadorSintatico::parteDeclaracoesVariaveis( )
 
 			if( this->iteradorSaidaAnalisadorLexico->second.token == ";" )
 			{
-				_parteDeclaracoesVariaveis->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_parteDeclaracoesVariaveis->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 
 				/*
@@ -720,7 +720,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::declaracaoVariaveis( )
 {
 	NoArvoreSintatica*
-	_declaracaoVariaveis = new NoArvoreSintatica( "<DECLARACAO_VARIAVEIS>", this->nivelLexicoAtual, false );
+	_declaracaoVariaveis = new NoArvoreSintatica( "<DECLARACAO_VARIAVEIS>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
 	{
@@ -728,7 +728,7 @@ AnalisadorSintatico::declaracaoVariaveis( )
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == ":" )
 		{
-			_declaracaoVariaveis->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_declaracaoVariaveis->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 
 			if( (this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR") ||
@@ -762,7 +762,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::listaIdentificadores( )
 {
 	NoArvoreSintatica*
-	_listaIdentificadores = new NoArvoreSintatica( "<LISTA_IDENTIFICADORES>", this->nivelLexicoAtual, false );
+	_listaIdentificadores = new NoArvoreSintatica( "<LISTA_IDENTIFICADORES>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	ConteudoHash*
 	_insercao;
@@ -785,7 +785,7 @@ AnalisadorSintatico::listaIdentificadores( )
 
 		while( this->iteradorSaidaAnalisadorLexico->second.token == "," )
 		{
-			_listaIdentificadores->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_listaIdentificadores->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 
 			if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
@@ -819,7 +819,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::listaIdentificadores( bool _passagem )
 {
 	NoArvoreSintatica*
-	_listaIdentificadores = new NoArvoreSintatica( "<LISTA_IDENTIFICADORES>", this->nivelLexicoAtual, false );
+	_listaIdentificadores = new NoArvoreSintatica( "<LISTA_IDENTIFICADORES>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	ConteudoHash*
 	_insercao;
@@ -843,7 +843,7 @@ AnalisadorSintatico::listaIdentificadores( bool _passagem )
 
 		while( this->iteradorSaidaAnalisadorLexico->second.token == "," )
 		{
-			_listaIdentificadores->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_listaIdentificadores->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 
 			if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
@@ -877,7 +877,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::parteDeclaracoesSubRotinas( )
 {
 	NoArvoreSintatica*
-	_parteDeclaracoesSubRotinas = new NoArvoreSintatica( "<PARTE_DECLARACOES_SUB_ROTINAS>", this->nivelLexicoAtual, false );
+	_parteDeclaracoesSubRotinas = new NoArvoreSintatica( "<PARTE_DECLARACOES_SUB_ROTINAS>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( (this->iteradorSaidaAnalisadorLexico->second.token != "procedure") &&
 		(this->iteradorSaidaAnalisadorLexico->second.token != "function") )
@@ -905,14 +905,14 @@ NoArvoreSintatica*
 AnalisadorSintatico::declaracaoProcedimento( )
 {
 	NoArvoreSintatica*
-	_declaracaoProcedimento = new NoArvoreSintatica( "<DECLARACAO_PROCEDIMENTO>", this->nivelLexicoAtual, false );
+	_declaracaoProcedimento = new NoArvoreSintatica( "<DECLARACAO_PROCEDIMENTO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	ConteudoHash*
 	_insercao;
 
 	if( this->iteradorSaidaAnalisadorLexico->second.token == "procedure" )
 	{
-		_declaracaoProcedimento->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_declaracaoProcedimento->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		++this->nivelLexicoAtual;
@@ -938,7 +938,7 @@ AnalisadorSintatico::declaracaoProcedimento( )
 
 			if( this->iteradorSaidaAnalisadorLexico->second.token == ";" )
 			{
-				_declaracaoProcedimento->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_declaracaoProcedimento->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 
 				/*
@@ -972,7 +972,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::declaracaoFuncao( )
 {
 	NoArvoreSintatica*
-	_declaracaoFuncao = new NoArvoreSintatica( "<DECLARACAO_FUNCAO>", this->nivelLexicoAtual, false );
+	_declaracaoFuncao = new NoArvoreSintatica( "<DECLARACAO_FUNCAO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	ConteudoHash*
 	_insercao;
@@ -982,7 +982,7 @@ AnalisadorSintatico::declaracaoFuncao( )
 
 	if( this->iteradorSaidaAnalisadorLexico->second.token == "function" )
 	{
-		_declaracaoFuncao->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_declaracaoFuncao->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		++this->nivelLexicoAtual;
@@ -1011,7 +1011,7 @@ AnalisadorSintatico::declaracaoFuncao( )
 
 			if( this->iteradorSaidaAnalisadorLexico->second.token == ":" )
 			{
-				_declaracaoFuncao->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_declaracaoFuncao->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 
 				if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
@@ -1022,7 +1022,7 @@ AnalisadorSintatico::declaracaoFuncao( )
 
 					if( this->iteradorSaidaAnalisadorLexico->second.token == ";" )
 					{
-						_declaracaoFuncao->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+						_declaracaoFuncao->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 						++this->iteradorSaidaAnalisadorLexico;
 
 						/*
@@ -1070,11 +1070,11 @@ NoArvoreSintatica*
 AnalisadorSintatico::parametrosFormais( )
 {
 	NoArvoreSintatica*
-	_parametrosFormais = new NoArvoreSintatica( "<PARAMETROS_FORMAIS>", this->nivelLexicoAtual, false );
+	_parametrosFormais = new NoArvoreSintatica( "<PARAMETROS_FORMAIS>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.token == "(" )
 	{
-		_parametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_parametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		if( (this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR") ||
@@ -1091,7 +1091,7 @@ AnalisadorSintatico::parametrosFormais( )
 
 		while( this->iteradorSaidaAnalisadorLexico->second.token == ";" )
 		{
-			_parametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_parametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 
 			if( (this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR") ||
@@ -1109,7 +1109,7 @@ AnalisadorSintatico::parametrosFormais( )
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == ")" )
 		{
-			_parametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_parametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 		}
 		else
@@ -1129,7 +1129,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::secaoParametrosFormais( )
 {
 	NoArvoreSintatica*
-	_secaoParametrosFormais = new NoArvoreSintatica( "<SECAO_PARAMETROS_FORMAIS>", this->nivelLexicoAtual, false );
+	_secaoParametrosFormais = new NoArvoreSintatica( "<SECAO_PARAMETROS_FORMAIS>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 
 	if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
@@ -1138,7 +1138,7 @@ AnalisadorSintatico::secaoParametrosFormais( )
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == ":" )
 		{
-			_secaoParametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_secaoParametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 
 			if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
@@ -1159,7 +1159,7 @@ AnalisadorSintatico::secaoParametrosFormais( )
 	}
 	else if( this->iteradorSaidaAnalisadorLexico->second.token == "var" )
 	{
-		_secaoParametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_secaoParametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
@@ -1168,7 +1168,7 @@ AnalisadorSintatico::secaoParametrosFormais( )
 
 			if( this->iteradorSaidaAnalisadorLexico->second.token == ":" )
 			{
-				_secaoParametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_secaoParametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 
 				if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
@@ -1192,7 +1192,7 @@ AnalisadorSintatico::secaoParametrosFormais( )
 	}
 	else if( this->iteradorSaidaAnalisadorLexico->second.token == "function" )
 	{
-		_secaoParametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_secaoParametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
@@ -1201,7 +1201,7 @@ AnalisadorSintatico::secaoParametrosFormais( )
 
 			if( this->iteradorSaidaAnalisadorLexico->second.token == ":" )
 			{
-				_secaoParametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_secaoParametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 
 				if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
@@ -1225,7 +1225,7 @@ AnalisadorSintatico::secaoParametrosFormais( )
 	}
 	else if( this->iteradorSaidaAnalisadorLexico->second.token == "procedure" )
 	{
-		_secaoParametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_secaoParametrosFormais->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
@@ -1245,18 +1245,18 @@ NoArvoreSintatica*
 AnalisadorSintatico::comandoComposto( )
 {
 	NoArvoreSintatica*
-	_comandoComposto = new NoArvoreSintatica( "<COMANDO_COMPOSTO>", this->nivelLexicoAtual, false );
+	_comandoComposto = new NoArvoreSintatica( "<COMANDO_COMPOSTO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.token == "begin" )
 	{
-		_comandoComposto->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_comandoComposto->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		_comandoComposto->insereFilho( this->comando() );
 
 		while( this->iteradorSaidaAnalisadorLexico->second.token == ";" )
 		{
-			_comandoComposto->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_comandoComposto->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 
 			if( this->iteradorSaidaAnalisadorLexico->second.token != "end" )
@@ -1267,7 +1267,7 @@ AnalisadorSintatico::comandoComposto( )
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == "end" )
 		{
-			_comandoComposto->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_comandoComposto->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 		}
 		else
@@ -1287,7 +1287,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::comando( )
 {
 	NoArvoreSintatica*
-	_comando = new NoArvoreSintatica( "<COMANDO>", this->nivelLexicoAtual, false );
+	_comando = new NoArvoreSintatica( "<COMANDO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "NUMERO" )
 	{
@@ -1295,7 +1295,7 @@ AnalisadorSintatico::comando( )
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == ":" )
 		{
-			_comando->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_comando->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 		}
 		else
@@ -1314,7 +1314,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::comandoSemRotulo( )
 {
 	NoArvoreSintatica*
-	_comandoSemRotulo = new NoArvoreSintatica( "<COMANDO_SEM_ROTULO>", this->nivelLexicoAtual, false );
+	_comandoSemRotulo = new NoArvoreSintatica( "<COMANDO_SEM_ROTULO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	std::map<int, StructToken>::iterator
 	_proximoToken;
@@ -1365,7 +1365,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::atribuicao(  )
 {
 	NoArvoreSintatica*
-	_atribuicao = new NoArvoreSintatica( "<ATRIBUICAO>", this->nivelLexicoAtual, false );
+	_atribuicao = new NoArvoreSintatica( "<ATRIBUICAO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
 	{
@@ -1373,7 +1373,7 @@ AnalisadorSintatico::atribuicao(  )
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == ":=" )
 		{
-			_atribuicao->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_atribuicao->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 
 			_atribuicao->insereFilho( this->expressao() );
@@ -1395,7 +1395,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::chamadaProcedimento( )
 {
 	NoArvoreSintatica*
-	_chamadaProcedimento = new NoArvoreSintatica( "<CHAMADA_PROCEDIMENTO>", this->nivelLexicoAtual, false );
+	_chamadaProcedimento = new NoArvoreSintatica( "<CHAMADA_PROCEDIMENTO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
 	{
@@ -1403,14 +1403,14 @@ AnalisadorSintatico::chamadaProcedimento( )
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == "(")
 		{
-			_chamadaProcedimento->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_chamadaProcedimento->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 
 			_chamadaProcedimento->insereFilho( this->listaExpressoes() );
 
 			if( this->iteradorSaidaAnalisadorLexico->second.token == ")" )
 			{
-				_chamadaProcedimento->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_chamadaProcedimento->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 			}
 			else
@@ -1431,11 +1431,11 @@ NoArvoreSintatica*
 AnalisadorSintatico::desvios( )
 {
 	NoArvoreSintatica*
-	_desvios = new NoArvoreSintatica( "<DESVIOS>", this->nivelLexicoAtual, false );
+	_desvios = new NoArvoreSintatica( "<DESVIOS>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.token == "goto" )
 	{
-		_desvios->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_desvios->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		_desvios->insereFilho( this->numero() );
@@ -1452,26 +1452,26 @@ NoArvoreSintatica*
 AnalisadorSintatico::comandoCondicional( )
 {
 	NoArvoreSintatica*
-	_comandoCondicional = new NoArvoreSintatica( "<COMANDO_CONDICIONAL>", this->nivelLexicoAtual, false );
+	_comandoCondicional = new NoArvoreSintatica( "<COMANDO_CONDICIONAL>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 
 	if( this->iteradorSaidaAnalisadorLexico->second.token == "if" )
 	{
-		_comandoCondicional->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_comandoCondicional->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		_comandoCondicional->insereFilho( this->expressao() );
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == "then" )
 		{
-			_comandoCondicional->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_comandoCondicional->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 
 			_comandoCondicional->insereFilho( this->comandoSemRotulo() );
 
 			if( this->iteradorSaidaAnalisadorLexico->second.token == "else" )
 			{
-				_comandoCondicional->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_comandoCondicional->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 
 				_comandoCondicional->insereFilho( this->comandoSemRotulo() );
@@ -1494,18 +1494,18 @@ NoArvoreSintatica*
 AnalisadorSintatico::comandoRepetitivo( )
 {
 	NoArvoreSintatica*
-	_comandoRepetitivo = new NoArvoreSintatica( "<COMANDO_REPETITIVO>", this->nivelLexicoAtual, false );
+	_comandoRepetitivo = new NoArvoreSintatica( "<COMANDO_REPETITIVO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.token == "while" )
 	{
-		_comandoRepetitivo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_comandoRepetitivo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		_comandoRepetitivo->insereFilho( this->expressao() );
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == "do" )
 		{
-			_comandoRepetitivo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_comandoRepetitivo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 
 			_comandoRepetitivo->insereFilho( comandoSemRotulo() );
@@ -1527,13 +1527,13 @@ NoArvoreSintatica*
 AnalisadorSintatico::listaExpressoes( )
 {
 	NoArvoreSintatica*
-	_listaExpressoes = new NoArvoreSintatica( "<LISTA_EXPRESSOES>", this->nivelLexicoAtual, false );
+	_listaExpressoes = new NoArvoreSintatica( "<LISTA_EXPRESSOES>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	_listaExpressoes->insereFilho( this->expressao() );
 
 	while( this->iteradorSaidaAnalisadorLexico->second.token == "," )
 	{
-		_listaExpressoes->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_listaExpressoes->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		_listaExpressoes->insereFilho( this->expressao() );
@@ -1546,7 +1546,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::expressao( )
 {
 	NoArvoreSintatica*
-	_expressao = new NoArvoreSintatica( "<EXPRESSAO>", this->nivelLexicoAtual, false );
+	_expressao = new NoArvoreSintatica( "<EXPRESSAO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	_expressao->insereFilho( this->expressaoSimples() );
 
@@ -1563,11 +1563,11 @@ NoArvoreSintatica*
 AnalisadorSintatico::relacao( )
 {
 	NoArvoreSintatica*
-	_relacao = new NoArvoreSintatica( "<RELACAO>", this->nivelLexicoAtual, false );
+	_relacao = new NoArvoreSintatica( "<RELACAO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "OPERADOR_RELACIONAL" )
 	{
-		_relacao->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_relacao->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 	}
 
@@ -1578,12 +1578,12 @@ NoArvoreSintatica*
 AnalisadorSintatico::expressaoSimples( )
 {
 	NoArvoreSintatica*
-	_expressaoSimples = new NoArvoreSintatica( "<EXPRESSAO_SIMPLES>", this->nivelLexicoAtual, false );
+	_expressaoSimples = new NoArvoreSintatica( "<EXPRESSAO_SIMPLES>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( (this->iteradorSaidaAnalisadorLexico->second.token == "+") ||
 		(this->iteradorSaidaAnalisadorLexico->second.token == "-") )
 	{
-		_expressaoSimples->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_expressaoSimples->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 	}
 
@@ -1593,7 +1593,7 @@ AnalisadorSintatico::expressaoSimples( )
 		   (this->iteradorSaidaAnalisadorLexico->second.token == "-") ||
 		   (this->iteradorSaidaAnalisadorLexico->second.token == "or") )
 	{
-		_expressaoSimples->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_expressaoSimples->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		_expressaoSimples->insereFilho( this->termo() );
@@ -1606,7 +1606,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::termo( )
 {
 	NoArvoreSintatica*
-	_termo = new NoArvoreSintatica( "<TERMO>", this->nivelLexicoAtual, false );
+	_termo = new NoArvoreSintatica( "<TERMO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	_termo->insereFilho( this->fator() );
 
@@ -1614,7 +1614,7 @@ AnalisadorSintatico::termo( )
 		   (this->iteradorSaidaAnalisadorLexico->second.token == "div") ||
 		   (this->iteradorSaidaAnalisadorLexico->second.token == "and") )
 	{
-		_termo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_termo->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		_termo->insereFilho( this->fator() );
@@ -1627,7 +1627,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::fator( )
 {
 	NoArvoreSintatica*
-	_fator = new NoArvoreSintatica( "<FATOR>", this->nivelLexicoAtual, false );
+	_fator = new NoArvoreSintatica( "<FATOR>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	std::string
 	_classificacao;
@@ -1640,21 +1640,21 @@ AnalisadorSintatico::fator( )
 
 	if( this->iteradorSaidaAnalisadorLexico->second.token == "not")
 	{
-		_fator->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_fator->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		_fator->insereFilho( this->fator() );
 	}
 	else if( this->iteradorSaidaAnalisadorLexico->second.token == "(" )
 	{
-		_fator->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_fator->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		_fator->insereFilho( this->expressao() );
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == ")" )
 		{
-			_fator->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_fator->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 		}
 		else
@@ -1719,7 +1719,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::variavel( )
 {
 	NoArvoreSintatica*
-	_variavel = new NoArvoreSintatica( "<VARIAVEL>", this->nivelLexicoAtual, false );
+	_variavel = new NoArvoreSintatica( "<VARIAVEL>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	_variavel->insereFilho( this->identificador() );
 
@@ -1730,20 +1730,20 @@ NoArvoreSintatica*
 AnalisadorSintatico::chamadaFuncao( )
 {
 	NoArvoreSintatica*
-	_chamadaFuncao = new NoArvoreSintatica( "<CHAMADA_FUNCAO>", this->nivelLexicoAtual, false );
+	_chamadaFuncao = new NoArvoreSintatica( "<CHAMADA_FUNCAO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	_chamadaFuncao->insereFilho( this->identificador() );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.token == "(" )
 	{
-		_chamadaFuncao->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_chamadaFuncao->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		_chamadaFuncao->insereFilho( this->listaExpressoes() );
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == ")" )
 		{
-			_chamadaFuncao->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_chamadaFuncao->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 		}
 		else
@@ -1759,7 +1759,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::numero( )
 {
 	NoArvoreSintatica*
-	_numero = new NoArvoreSintatica( "<NUMERO>", this->nivelLexicoAtual, false );
+	_numero = new NoArvoreSintatica( "<NUMERO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 //
 //	size_t
 //	posicaoCorte;
@@ -1774,7 +1774,7 @@ AnalisadorSintatico::numero( )
 //		++this->iteradorSaidaAnalisadorLexico;
 //	}
 
-	_numero->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+	_numero->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 	++this->iteradorSaidaAnalisadorLexico;
 
 	return _numero;
@@ -1784,9 +1784,9 @@ NoArvoreSintatica*
 AnalisadorSintatico::digito( std::string _digitoInsercao )
 {
 	NoArvoreSintatica*
-	_digito = new NoArvoreSintatica( "<DIGITO>", this->nivelLexicoAtual, false );
+	_digito = new NoArvoreSintatica( "<DIGITO>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
-	_digito->insereFilho( _digitoInsercao, this->nivelLexicoAtual, true );
+//	_digito->insereFilho( _digitoInsercao, this->nivelLexicoAtual, true );
 
 	return _digito;
 }
@@ -1795,7 +1795,7 @@ NoArvoreSintatica*
 AnalisadorSintatico::identificador( )
 {
 	NoArvoreSintatica*
-	_identificador = new NoArvoreSintatica( "<IDENTIFICADOR>", this->nivelLexicoAtual, false );
+	_identificador = new NoArvoreSintatica( "<IDENTIFICADOR>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 //	regex_t
 //	expressaoRegularDigito;
@@ -1840,7 +1840,7 @@ AnalisadorSintatico::identificador( )
 //	regfree( &expressaoRegularDigito );
 //	regfree( &expressaoRegularLetra );
 
-	_identificador->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+	_identificador->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 	++this->iteradorSaidaAnalisadorLexico;
 
 
@@ -1851,9 +1851,9 @@ NoArvoreSintatica*
 AnalisadorSintatico::letra( std::string _letraInsercao )
 {
 	NoArvoreSintatica*
-	_letra = new NoArvoreSintatica( "<LETRA>", this->nivelLexicoAtual, false );
+	_letra = new NoArvoreSintatica( "<LETRA>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
-	_letra->insereFilho( _letraInsercao.c_str(), this->nivelLexicoAtual, true );
+//	_letra->insereFilho( _letraInsercao.c_str(), this->nivelLexicoAtual, true,  );
 
 	return _letra;
 }
@@ -1862,23 +1862,23 @@ NoArvoreSintatica*
 AnalisadorSintatico::comandoLeitura( )
 {
 	NoArvoreSintatica*
-	_comandoLeitura = new NoArvoreSintatica( "<COMANDO_LEITURA>", this->nivelLexicoAtual, false );
+	_comandoLeitura = new NoArvoreSintatica( "<COMANDO_LEITURA>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.token == "read" )
 	{
-		_comandoLeitura->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_comandoLeitura->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == "(" )
 		{
-			_comandoLeitura->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_comandoLeitura->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 
 			_comandoLeitura->insereFilho( this->listaIdentificadores() );
 
 			if( this->iteradorSaidaAnalisadorLexico->second.token == ")" )
 			{
-				_comandoLeitura->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_comandoLeitura->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 			}
 			else
@@ -1899,23 +1899,23 @@ NoArvoreSintatica*
 AnalisadorSintatico::comandoEscrita( )
 {
 	NoArvoreSintatica*
-	_comandoEscrita = new NoArvoreSintatica( "<COMANDO_ESCRITA>", this->nivelLexicoAtual, false );
+	_comandoEscrita = new NoArvoreSintatica( "<COMANDO_ESCRITA>", this->nivelLexicoAtual, false, this->iteradorSaidaAnalisadorLexico->second.linha );
 
 	if( this->iteradorSaidaAnalisadorLexico->second.token == "write" )
 	{
-		_comandoEscrita->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+		_comandoEscrita->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 		++this->iteradorSaidaAnalisadorLexico;
 
 		if( this->iteradorSaidaAnalisadorLexico->second.token == "(" )
 		{
-			_comandoEscrita->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+			_comandoEscrita->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 			++this->iteradorSaidaAnalisadorLexico;
 
 			_comandoEscrita->insereFilho( this->expressao() );
 
 			while( this->iteradorSaidaAnalisadorLexico->second.token == "," )
 			{
-				_comandoEscrita->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_comandoEscrita->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 
 				_comandoEscrita->insereFilho( this->expressao() );
@@ -1923,7 +1923,7 @@ AnalisadorSintatico::comandoEscrita( )
 
 			if( this->iteradorSaidaAnalisadorLexico->second.token == ")" )
 			{
-				_comandoEscrita->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true );
+				_comandoEscrita->insereFilho( this->iteradorSaidaAnalisadorLexico->second.token, this->nivelLexicoAtual, true, this->iteradorSaidaAnalisadorLexico->second.linha);
 				++this->iteradorSaidaAnalisadorLexico;
 			}
 			else

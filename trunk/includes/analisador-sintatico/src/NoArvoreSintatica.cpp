@@ -6,10 +6,11 @@
 
 
 
-NoArvoreSintatica::NoArvoreSintatica( std::string _descricao, int _nivelLexico, bool _isTerminal = false )
+NoArvoreSintatica::NoArvoreSintatica( std::string _descricao, int _nivelLexico, bool _isTerminal = false, unsigned int _linha = 0 )
 {
 	this->setDescricao( _descricao );
 	this->setNivelLexico( _nivelLexico );
+	this->setLinha( _linha );
 	this->setIsTerminal( _isTerminal );
 }
 
@@ -28,6 +29,12 @@ const int
 NoArvoreSintatica::getNivelLexico( )
 {
 	return this->nivelLexico;
+}
+
+const int
+NoArvoreSintatica::getLinha( )
+{
+	return this->linha;
 }
 
 const bool
@@ -49,16 +56,22 @@ NoArvoreSintatica::setNivelLexico( const int _nivelLexico )
 }
 
 void
+NoArvoreSintatica::setLinha( const unsigned int _linha )
+{
+	this->linha = _linha;
+}
+
+void
 NoArvoreSintatica::setIsTerminal( const bool _isTerminal )
 {
 	this->isTerminal = _isTerminal;
 }
 
 void
-NoArvoreSintatica::insereFilho( std::string _descricao, int _nivelLexico, bool _isTerminal = true )
+NoArvoreSintatica::insereFilho( std::string _descricao, int _nivelLexico, bool _isTerminal = true, unsigned int _linha = 0 )
 {
 	NoArvoreSintatica*
-	_noInsercao = new NoArvoreSintatica( _descricao, _nivelLexico, _isTerminal );
+	_noInsercao = new NoArvoreSintatica( _descricao, _nivelLexico, _isTerminal, _linha );
 
 	this->filhos.push_back( _noInsercao );
 }

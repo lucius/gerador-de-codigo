@@ -665,6 +665,11 @@ AnalisadorSemantico::expressao( NoArvoreSintatica* _expressao )
 	if( _filhos.size() != 1 )
 	{
 		_resultado = this->relacao( _filhos[1] );
+
+		if( this->expressaoSimples(_filhos[2]) != "integer" )
+		{
+			LogErros::getInstancia().insereErro( _expressao->getLinha(), "Operadores relacionais nao podem ser utilizados com 'boolean'." );
+		}
 	}
 
 	return _resultado;

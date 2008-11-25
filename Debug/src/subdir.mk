@@ -4,13 +4,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/GeradorDeCodigo.cpp 
+../src/GeradorDeCodigo.cpp \
+../src/itos.cpp \
+../src/stoi.cpp 
 
 OBJS += \
-./src/GeradorDeCodigo.o 
+./src/GeradorDeCodigo.o \
+./src/itos.o \
+./src/stoi.o 
 
 CPP_DEPS += \
-./src/GeradorDeCodigo.d 
+./src/GeradorDeCodigo.d \
+./src/itos.d \
+./src/stoi.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

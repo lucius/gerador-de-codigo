@@ -1173,6 +1173,8 @@ AnalisadorSintatico::secaoParametrosFormais( )
 
 				if( this->iteradorSaidaAnalisadorLexico->second.classificacao == "IDENTIFICADOR" )
 				{
+					this->setaTipoNaLista( this->iteradorSaidaAnalisadorLexico->second.token );
+
 					_secaoParametrosFormais->insereFilho( this->identificador() );
 				}
 				else

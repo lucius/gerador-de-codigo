@@ -27,9 +27,6 @@ class AnalisadorSemantico
 		NoArvoreSintatica*
 		noCorrente;
 
-		unsigned int
-		nivelLexicoAtual;
-
 		void
 		analise( );
 

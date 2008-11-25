@@ -80,11 +80,11 @@ ConteudoHash::getTipo( )
 	{
 		return this->variavel->tipo;
 	}
-	else if( this->procedureFunction != NULL )
+	else if( this->parametrosFormais != NULL )
 	{
 		return this->parametrosFormais->tipo;
 	}
-	else if( this->parametrosFormais != NULL )
+	else if( this->procedureFunction != NULL )
 	{
 		return this->procedureFunction->retorno;
 	}

@@ -81,7 +81,14 @@ main(int argc, char* argv[])
 	/*
 	 * Exibe o log de Erros do Analisador
 	 */
-	LogErros::getInstancia( ).getLog( );
-
-	return (EXIT_SUCCESS);
+	if( LogErros::getInstancia( ).getQuantidadeErros() )
+	{
+		LogErros::getInstancia( ).getLog( );
+		return( EXIT_FAILURE );
+	}
+	else
+	{
+		LogErros::getInstancia( ).getLog( );
+		return( EXIT_SUCCESS );
+	}
 }

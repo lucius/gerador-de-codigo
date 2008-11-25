@@ -64,6 +64,9 @@ main(int argc, char* argv[])
 		if( LogErros::getInstancia( ).getQuantidadeErros() )
 		{
 			semantico = new AnalisadorSemantico( sintatico->getSaidaAnalisadorSintatico() );
+		}
+		if( LogErros::getInstancia( ).getQuantidadeErros() )
+		{
 			gerador = new GeradorDeCodigo( sintatico->getSaidaAnalisadorSintatico() );
 		}
 	}

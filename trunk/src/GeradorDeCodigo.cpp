@@ -5,34 +5,8 @@
 #include "../includes/analisador-lexico/includes/LogErros.h"
 
 #include "../includes/GeradorDeCodigo.h"
-
-std::string
-itos( int _inteiro )
-{
-	std::ostringstream
-	_buffer;
-
-	_buffer << _inteiro;
-
-	return _buffer.str();
-}
-
-int
-stoi( std::string _string )
-{
-	if( _string == "true" )
-	{
-		return 1;
-	}
-	else if( _string == "false" )
-	{
-		return 0;
-	}
-	else
-	{
-		return ::atoi( _string.c_str() );
-	}
-}
+#include "../includes/stoi.h"
+#include "../includes/itos.h"
 
 
 GeradorDeCodigo::GeradorDeCodigo( std::pair<TabelaHash*, NoArvoreSintatica*> _saidaAnalisadorSintatico )
@@ -650,11 +624,11 @@ GeradorDeCodigo::chamadaFuncao( NoArvoreSintatica* _chamadaFuncao )
 				{
 					if( _resultadoBuscaParametro->second->parametrosFormais->passagem == true )
 					{
-						this->CRVL( _resultadoBuscaParametro->second->variavel->nivelLexico, _resultadoBuscaParametro->second->variavel->deslocamento );
+						this->CRVL( _resultadoBuscaParametro->second->parametrosFormais->nivelLexico, _resultadoBuscaParametro->second->parametrosFormais->deslocamento );
 					}
 					else
 					{
-						this->CREN( _resultadoBuscaParametro->second->variavel->nivelLexico, _resultadoBuscaParametro->second->variavel->deslocamento );
+						this->CREN( _resultadoBuscaParametro->second->parametrosFormais->nivelLexico, _resultadoBuscaParametro->second->parametrosFormais->deslocamento );
 					}
 				}
 				else

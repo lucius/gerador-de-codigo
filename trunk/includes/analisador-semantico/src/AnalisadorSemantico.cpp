@@ -1,15 +1,18 @@
 #include <iostream>
 #include <vector>
 
-#include "../includes/AnalisadorSemantico.h"
 #include "../../analisador-lexico/includes/LogErros.h"
+
+#include "../includes/AnalisadorSemantico.h"
+
+#include "../../itos.h"
+
+
 
 AnalisadorSemantico::AnalisadorSemantico( std::pair<TabelaHash*, NoArvoreSintatica*> _saidaAnalisadorSintatico )
 {
 	this->hash = *(_saidaAnalisadorSintatico.first);
 	this->raiz = _saidaAnalisadorSintatico.second;
-
-	this->nivelLexicoAtual = 0;
 
 	this->analise( );
 }
@@ -240,11 +243,11 @@ AnalisadorSemantico::comandoLeitura( NoArvoreSintatica* _comandoLeitura )
 			/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
 			 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
 			 */
-			for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
+			for( _contador = 0; (_comandoLeitura->getNivelLexico()-_contador) +1 != 0; ++_contador )
 			{
-				if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
+				if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, _comandoLeitura->getNivelLexico()-_contador)] != this->hash.end() )
 				{
-					_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
+					_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, _comandoLeitura->getNivelLexico()-_contador)];
 
 					_classificacao = _resultadoBusca->second->getConteudo();
 
@@ -304,11 +307,11 @@ AnalisadorSemantico::atribuicao( NoArvoreSintatica* _atribuicao )
 	/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
 	 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
 	 */
-	for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
+	for( _contador = 0; (_atribuicao->getNivelLexico()-_contador) +1 != 0; ++_contador )
 	{
-		if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
+		if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, _atribuicao->getNivelLexico()-_contador)] != this->hash.end() )
 		{
-			_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
+			_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao,  _atribuicao->getNivelLexico()-_contador)];
 
 			_classificacao = _resultadoBusca->second->getConteudo();
 
@@ -356,9 +359,6 @@ AnalisadorSemantico::chamadaFuncao( NoArvoreSintatica* _chamadaFuncao )
 	std::vector<NoArvoreSintatica*>
 	_verificacaoParametro;
 
-	NoArvoreSintatica*
-	_paiVerificacaoParametro;
-
 	TabelaHash::iterator
 	_resultadoBusca;
 
@@ -378,6 +378,12 @@ AnalisadorSemantico::chamadaFuncao( NoArvoreSintatica* _chamadaFuncao )
 	_tipoParametro;
 
 	std::string
+	_bufferContador;
+
+	std::string
+	_resultadoExpressao;
+
+	std::string
 	_quantidadeParametrosStr;
 
 	unsigned int
@@ -387,32 +393,25 @@ AnalisadorSemantico::chamadaFuncao( NoArvoreSintatica* _chamadaFuncao )
 	_encontrado = false;
 
 	bool
-	_erro = false;
+	_erro = true;
 
-	std::string
-	_resultadoExpressao;
-
-	std::string
-	_bufferContador;
-
-
-	if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)] != this->hash.end() )
-	{
-		_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)];
-
-		_encontrado = true;
-	}
 	/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
 	 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
 	 */
+	if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, _chamadaFuncao->getNivelLexico()+1)] != this->hash.end() )
+	{
+		_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, _chamadaFuncao->getNivelLexico()+1)];
+
+		_encontrado = true;
+	}
 
 	if( !_encontrado )
 	{
-		for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
+		for( _contador = 0; (_chamadaFuncao->getNivelLexico()-_contador) +1 != 0; ++_contador )
 		{
-			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
+			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, _chamadaFuncao->getNivelLexico()-_contador)] != this->hash.end() )
 			{
-				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
+				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, _chamadaFuncao->getNivelLexico()-_contador)];
 
 				_encontrado = true;
 				break;
@@ -420,85 +419,79 @@ AnalisadorSemantico::chamadaFuncao( NoArvoreSintatica* _chamadaFuncao )
 		}
 	}
 
+	_resultadoExpressao = _resultadoBusca->second->getTipo( );
 	_quantidadeParametros = _resultadoBusca->second->procedureFunction->quantidadeParametros;
 
-	if( _quantidadeParametros != 0 )
+	if( _filhos.size() > 3 )
 	{
 		_listaExpressoes = _filhos[2]->getFilhos( );
-	}
 
-	if( _quantidadeParametros != ((_listaExpressoes.size()+1)/2) )
+		if( _quantidadeParametros == 0 )
+		{
+			LogErros::getInstancia().insereErro( _chamadaFuncao->getLinha(), "A funcao '" + _descricao + "' nao possui parametros" );
+		}
+		else if( _quantidadeParametros != ((_listaExpressoes.size()+1)/2) )
+		{
+			_quantidadeParametrosStr = itos( _quantidadeParametros );
+			LogErros::getInstancia().insereErro( _chamadaFuncao->getLinha(), "Quantidade de parametros incorreta. Sao esperados [" + _quantidadeParametrosStr + "] parametros" );
+		}
+	}
+	else if( _quantidadeParametros != 0 )
 	{
-		_quantidadeParametrosStr = _quantidadeParametros;
+		_quantidadeParametrosStr = itos( _quantidadeParametros );
 		LogErros::getInstancia().insereErro( _chamadaFuncao->getLinha(), "Quantidade de parametros incorreta. Sao esperados [" + _quantidadeParametrosStr + "] parametros" );
 	}
 
-	for( _contador = 0; _contador < _listaExpressoes.size(); _contador += 2 )
+	for( _contador = 0; _contador < _quantidadeParametros; ++_contador )
 	{
-		if( _resultadoBusca->second->procedureFunction->parametros[_contador/2].first == true )
-		{
-			_bufferContador = (_contador+1);
-			_paiVerificacaoParametro = _listaExpressoes[_contador];
-			_verificacaoParametro = _listaExpressoes[_contador]->getFilhos( );
+		_bufferContador = itos( _contador + 1 );
 
-			while( _verificacaoParametro.size() < 2 )
+		if( _resultadoBusca->second->procedureFunction->parametros[_contador].first == true )
+		{
+			_verificacaoParametro = _listaExpressoes[_contador*2]->getFilhos( );
+
+			if( _verificacaoParametro.size() == 1 )
 			{
-				_bufferContador = (_contador+1);
-	
-				if( _verificacaoParametro.size() == 0 )
+				_verificacaoParametro = _verificacaoParametro[0]->getFilhos( );
+				if( _verificacaoParametro.size() == 1 )
 				{
-					if( _paiVerificacaoParametro->getDescricao( ) == "<VARIAVEL>" )
-					{
-						break;
-					}
-					else
-					{
-						LogErros::getInstancia().insereErro( _chamadaFuncao->getLinha(), "O " + _bufferContador + "deveria ser uma variavel." );
-						_erro = true;
-					}
-				}
-				else if( _verificacaoParametro.size() == 1 )
-				{
-					_paiVerificacaoParametro = _verificacaoParametro[0];
 					_verificacaoParametro = _verificacaoParametro[0]->getFilhos( );
-				}
-				else
-				{
-					LogErros::getInstancia().insereErro( _chamadaFuncao->getLinha(), "O " + _bufferContador + "deveria ser uma variavel." );
-					_erro = true;
+					if( _verificacaoParametro.size() == 1 )
+					{
+						_verificacaoParametro = _verificacaoParametro[0]->getFilhos( );
+						if( _verificacaoParametro.size() == 1 )
+						{
+							if( _verificacaoParametro[0]->getDescricao() == "<VARIAVEL>" )
+							{
+								_erro = false;
+							}
+						}
+					}
 				}
 			}
-			if( _verificacaoParametro.size() < 2 )
+
+			if( _resultadoBusca->second->procedureFunction->parametros[_contador].second != this->expressao(_listaExpressoes[_contador*2]) )
 			{
-				LogErros::getInstancia().insereErro( _chamadaFuncao->getLinha(), "O " + _bufferContador + "deveria ser uma variavel." );
 				_erro = true;
 			}
 
 			if( _erro )
 			{
-				_identificadorVariavel = _listaExpressoes[_contador]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getDescricao( );
-
-				_resultadoBuscaParametro = this->hash[std::pair<const std::string, const unsigned int>(_identificadorVariavel, this->nivelLexicoAtual)];
-
-				if( _resultadoBuscaParametro != this->hash.end() )
-				{
-					if( _resultadoBusca->second->procedureFunction->parametros[_contador].second != _resultadoBuscaParametro->second->getTipo() );
-					{
-						LogErros::getInstancia().insereErro( _chamadaFuncao->getLinha(), "Tipos imcompatíveis de parametros." );
-					}
-				}
+				LogErros::getInstancia().insereErro( _chamadaFuncao->getLinha(), "O parametro '" + _bufferContador + "' deveria ser uma variavel do tipo '" + _resultadoBusca->second->procedureFunction->parametros[_contador].second + "'." );
+				_erro = true;
 			}
 		}
 		else
 		{
-			_resultadoExpressao = this->expressao( _listaExpressoes[_contador] );
-			
-			if( _resultadoBuscaParametro != this->hash.end() )
+			if( _resultadoBusca->second->procedureFunction->parametros[_contador].second == this->expressao(_listaExpressoes[_contador*2]) )
 			{
-				if( _resultadoBusca->second->procedureFunction->parametros[_contador].second != _resultadoBuscaParametro->second->getTipo() );
-				{
-					LogErros::getInstancia().insereErro( _chamadaFuncao->getLinha(), "Tipos imcompatíveis de parametros." );
-				}
+				_erro = false;
+			}
+
+			if( _erro )
+			{
+				LogErros::getInstancia().insereErro( _chamadaFuncao->getLinha(), "O parametro '" + _bufferContador + "' deveria ser do tipo '" + _resultadoBusca->second->procedureFunction->parametros[_contador].second + "'." );
+				_erro = true;
 			}
 		}
 	}
@@ -518,9 +511,6 @@ AnalisadorSemantico::chamadaProcedimento( NoArvoreSintatica* _chamadaProcediment
 	std::vector<NoArvoreSintatica*>
 	_verificacaoParametro;
 
-	NoArvoreSintatica*
-	_paiVerificacaoParametro;
-
 	TabelaHash::iterator
 	_resultadoBusca;
 
@@ -555,26 +545,25 @@ AnalisadorSemantico::chamadaProcedimento( NoArvoreSintatica* _chamadaProcediment
 	_encontrado = false;
 
 	bool
-	_erro = false;
+	_erro = true;
 
 	/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
 	 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
 	 */
-
-	if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)] != this->hash.end() )
+	if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, _chamadaProcedimento->getNivelLexico()+1)] != this->hash.end() )
 	{
-		_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)];
+		_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, _chamadaProcedimento->getNivelLexico()+1)];
 
 		_encontrado = true;
 	}
 
 	if( !_encontrado )
 	{
-		for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
+		for( _contador = 0; (_chamadaProcedimento->getNivelLexico()-_contador) +1 != 0; ++_contador )
 		{
-			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
+			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, _chamadaProcedimento->getNivelLexico()-_contador)] != this->hash.end() )
 			{
-				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
+				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, _chamadaProcedimento->getNivelLexico()-_contador)];
 
 				_encontrado = true;
 				break;
@@ -585,83 +574,76 @@ AnalisadorSemantico::chamadaProcedimento( NoArvoreSintatica* _chamadaProcediment
 	_resultadoExpressao = _resultadoBusca->second->getTipo( );
 	_quantidadeParametros = _resultadoBusca->second->procedureFunction->quantidadeParametros;
 
-	if( _quantidadeParametros != 0 )
+	if( _filhos.size() > 1 )
 	{
 		_listaExpressoes = _filhos[2]->getFilhos( );
-	}
 
-	if( _quantidadeParametros != ((_listaExpressoes.size()+1)/2) )
+		if( _quantidadeParametros == 0 )
+		{
+			LogErros::getInstancia().insereErro( _chamadaProcedimento->getLinha(), "O procedimento '" + _descricao + "' nao possui parametros" );
+		}
+		else if( _quantidadeParametros != ((_listaExpressoes.size()+1)/2) )
+		{
+			_quantidadeParametrosStr = itos( _quantidadeParametros );
+			LogErros::getInstancia().insereErro( _chamadaProcedimento->getLinha(), "Quantidade de parametros incorreta. Sao esperados [" + _quantidadeParametrosStr + "] parametros" );
+		}
+	}
+	else if( _quantidadeParametros != 0 )
 	{
-		_quantidadeParametrosStr = _quantidadeParametros;
+		_quantidadeParametrosStr = itos( _quantidadeParametros );
 		LogErros::getInstancia().insereErro( _chamadaProcedimento->getLinha(), "Quantidade de parametros incorreta. Sao esperados [" + _quantidadeParametrosStr + "] parametros" );
 	}
 
-	for( _contador = 0; _contador < _listaExpressoes.size(); _contador += 2 )
+	for( _contador = 0; _contador < _quantidadeParametros; ++_contador )
 	{
-		if( _resultadoBusca->second->procedureFunction->parametros[_contador/2].first == true )
-		{
-			_bufferContador = (_contador+1);
-			_paiVerificacaoParametro = _listaExpressoes[_contador];
-			_verificacaoParametro = _listaExpressoes[_contador]->getFilhos( );
+		_bufferContador = itos( _contador + 1 );
 
-			while( _verificacaoParametro.size() < 2 )
+		if( _resultadoBusca->second->procedureFunction->parametros[_contador].first == true )
+		{
+			_verificacaoParametro = _listaExpressoes[_contador*2]->getFilhos( );
+
+			if( _verificacaoParametro.size() == 1 )
 			{
-				_bufferContador = (_contador+1);
-	
-				if( _verificacaoParametro.size() == 0 )
+				_verificacaoParametro = _verificacaoParametro[0]->getFilhos( );
+				if( _verificacaoParametro.size() == 1 )
 				{
-					if( _paiVerificacaoParametro->getDescricao( ) == "<VARIAVEL>" )
-					{
-						break;
-					}
-					else
-					{
-						LogErros::getInstancia().insereErro( _chamadaProcedimento->getLinha(), "O " + _bufferContador + "deveria ser uma variavel." );
-						_erro = true;
-					}
-				}
-				else if( _verificacaoParametro.size() == 1 )
-				{
-					_paiVerificacaoParametro = _verificacaoParametro[0];
 					_verificacaoParametro = _verificacaoParametro[0]->getFilhos( );
-				}
-				else
-				{
-					LogErros::getInstancia().insereErro( _chamadaProcedimento->getLinha(), "O " + _bufferContador + "deveria ser uma variavel." );
-					_erro = true;
+					if( _verificacaoParametro.size() == 1 )
+					{
+						_verificacaoParametro = _verificacaoParametro[0]->getFilhos( );
+						if( _verificacaoParametro.size() == 1 )
+						{
+							if( _verificacaoParametro[0]->getDescricao() == "<VARIAVEL>" )
+							{
+								_erro = false;
+							}
+						}
+					}
 				}
 			}
-			if( _verificacaoParametro.size() < 2 )
+
+			if( _resultadoBusca->second->procedureFunction->parametros[_contador].second != this->expressao(_listaExpressoes[_contador*2]) )
 			{
-				LogErros::getInstancia().insereErro( _chamadaProcedimento->getLinha(), "O " + _bufferContador + "deveria ser uma variavel." );
 				_erro = true;
 			}
 
 			if( _erro )
 			{
-				_identificadorVariavel = _listaExpressoes[_contador]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getFilhos( )[0]->getDescricao( );
-
-				_resultadoBuscaParametro = this->hash[std::pair<const std::string, const unsigned int>(_identificadorVariavel, this->nivelLexicoAtual)];
-
-				if( _resultadoBuscaParametro != this->hash.end() )
-				{
-					if( _resultadoBusca->second->procedureFunction->parametros[_contador].second != _resultadoBuscaParametro->second->getTipo() );
-					{
-						LogErros::getInstancia().insereErro( _chamadaProcedimento->getLinha(), "Tipos imcompatíveis de parametros." );
-					}
-				}
+				LogErros::getInstancia().insereErro( _chamadaProcedimento->getLinha(), "O parametro '" + _bufferContador + "' deveria ser uma variavel do tipo '" + _resultadoBusca->second->procedureFunction->parametros[_contador].second + "'." );
+				_erro = true;
 			}
 		}
 		else
 		{
-			_resultadoExpressao = this->expressao( _listaExpressoes[_contador] );
-			
-			if( _resultadoBuscaParametro != this->hash.end() )
+			if( _resultadoBusca->second->procedureFunction->parametros[_contador].second == this->expressao(_listaExpressoes[_contador*2]) )
 			{
-				if( _resultadoBusca->second->procedureFunction->parametros[_contador].second != _resultadoBuscaParametro->second->getTipo() );
-				{
-					LogErros::getInstancia().insereErro( _chamadaProcedimento->getLinha(), "Tipos imcompatíveis de parametros." );
-				}
+				_erro = false;
+			}
+
+			if( _erro )
+			{
+				LogErros::getInstancia().insereErro( _chamadaProcedimento->getLinha(), "O parametro '" + _bufferContador + "' deveria ser do tipo '" + _resultadoBusca->second->procedureFunction->parametros[_contador].second + "'." );
+				_erro = true;
 			}
 		}
 	}
@@ -703,6 +685,10 @@ AnalisadorSemantico::relacao( NoArvoreSintatica* _relacao )
 	{
 		return "boolean";
 	}
+	else
+	{
+		return "integer";
+	}
 }
 
 std::string
@@ -715,13 +701,13 @@ AnalisadorSemantico::expressaoSimples( NoArvoreSintatica* _expressaoSimples )
 	_iteradorFilhos = _filhos.begin( );
 
 	std::string
-	_resultado;
+	_resultado = "integer";
 
 
 	if( _filhos[0]->getDescricao() == "+" )
 	{
 		++_iteradorFilhos;
-		if( this->termo((*_iteradorFilhos)) != "integer" );
+		if( this->termo((*_iteradorFilhos)) != "integer" )
 		{
 			LogErros::getInstancia().insereErro( _expressaoSimples->getLinha(), "Operador '+' nao pode ser usado com termo 'boolean'." );
 			return "boolean";
@@ -730,7 +716,7 @@ AnalisadorSemantico::expressaoSimples( NoArvoreSintatica* _expressaoSimples )
 	else if ( _filhos[0]->getDescricao() == "-" )
 	{
 		++_iteradorFilhos;
-		if( this->termo((*_iteradorFilhos)) != "integer" );
+		if( this->termo((*_iteradorFilhos)) != "integer" )
 		{
 			LogErros::getInstancia().insereErro( _expressaoSimples->getLinha(), "Operador '-' nao pode ser usado com termo 'boolean'." );
 			return "boolean";
@@ -747,7 +733,8 @@ AnalisadorSemantico::expressaoSimples( NoArvoreSintatica* _expressaoSimples )
 	{
 		if( (*_iteradorFilhos)->getDescricao() == "+" )
 		{
-			if( this->termo(++(*_iteradorFilhos)) != "integer" );
+			++_iteradorFilhos;
+			if( this->termo(*_iteradorFilhos) != "integer" )
 			{
 				LogErros::getInstancia().insereErro( _expressaoSimples->getLinha(), "Operador '+' nao pode ser usado com termo 'boolean'." );
 				return "boolean";
@@ -755,7 +742,8 @@ AnalisadorSemantico::expressaoSimples( NoArvoreSintatica* _expressaoSimples )
 		}
 		else if( (*_iteradorFilhos)->getDescricao() == "-" )
 		{
-			if( this->termo(++(*_iteradorFilhos)) != "integer" );
+			++_iteradorFilhos;
+			if( this->termo(*_iteradorFilhos) != "integer" )
 			{
 				LogErros::getInstancia().insereErro( _expressaoSimples->getLinha(), "Operador '-' nao pode ser usado com termo 'boolean'." );
 				return "boolean";
@@ -790,7 +778,8 @@ AnalisadorSemantico::termo( NoArvoreSintatica* _termo )
 	{
 		if( (*_iteradorFilhos)->getDescricao() == "*" )
 		{
-			if( this->fator(++(*_iteradorFilhos)) != "integer" );
+			++_iteradorFilhos;
+			if( this->fator(*_iteradorFilhos) != "integer" )
 			{
 				LogErros::getInstancia().insereErro( _termo->getLinha(), "Operador '*' nao pode ser usado com fator 'boolean'." );
 				return "boolean";
@@ -798,7 +787,8 @@ AnalisadorSemantico::termo( NoArvoreSintatica* _termo )
 		}
 		else if( (*_iteradorFilhos)->getDescricao() == "div" )
 		{
-			if( this->fator(++(*_iteradorFilhos)) != "integer" );
+			++_iteradorFilhos;
+			if( this->fator(*_iteradorFilhos) != "integer" )
 			{
 				LogErros::getInstancia().insereErro( _termo->getLinha(), "Operador 'div' nao pode ser usado com fator 'boolean'." );
 				return "boolean";
@@ -839,11 +829,11 @@ AnalisadorSemantico::fator( NoArvoreSintatica* _fator )
 	_encontrado = false;
 
 	std::string
-	_resultado;
+	_resultado = "integer";
 
 	if( _filhos[0]->getDescricao() == "not")
 	{
-		if( this->fator(_filhos[1]) != "boolean" );
+		if( this->fator(_filhos[1]) != "boolean" )
 		{
 			LogErros::getInstancia().insereErro( _fator->getLinha(), "Operador 'not' nao pode ser usado com fator 'integer'." );
 			return "boolean";
@@ -857,9 +847,13 @@ AnalisadorSemantico::fator( NoArvoreSintatica* _fator )
 	else if( _filhos[0]->getDescricao() == "<NUMERO>" )
 	{
 		if( (_filhos[0]->getFilhos()[0]->getDescricao() == "true") ||
-			(_filhos[0]->getFilhos()[0]->getDescricao() == "true") )
+			(_filhos[0]->getFilhos()[0]->getDescricao() == "false") )
 		{
 			_resultado = "boolean";
+		}
+		else
+		{
+			_resultado = "integer";
 		}
 	}
 	else if( _filhos[0]->getDescricao() == "<VARIAVEL>" )
@@ -869,11 +863,11 @@ AnalisadorSemantico::fator( NoArvoreSintatica* _fator )
 		/*		'this->nivelLexicoAtual' nunca podera ser menor que 0 por definicao
 		 *		para evitar o estouro para cima de unsigned int foi utilizada a comparação '!= 0'
 		 */
-		for( _contador = 0; (this->nivelLexicoAtual-_contador) +1 != 0; ++_contador )
+		for( _contador = 0; (_fator->getNivelLexico()-_contador) +1 != 0; ++_contador )
 		{
-			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)] != this->hash.end() )
+			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, _fator->getNivelLexico()-_contador)] != this->hash.end() )
 			{
-				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual-_contador)];
+				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, _fator->getNivelLexico()-_contador)];
 				_classificacao = _resultadoBusca->second->getConteudo();
 
 				_encontrado = true;
@@ -883,9 +877,9 @@ AnalisadorSemantico::fator( NoArvoreSintatica* _fator )
 
 		if( !_encontrado )
 		{
-			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)] != this->hash.end() )
+			if( this->hash[std::pair<const std::string, const unsigned int>(_descricao, _fator->getNivelLexico()+1)] != this->hash.end() )
 			{
-				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, this->nivelLexicoAtual+1)];
+				_resultadoBusca = this->hash[std::pair<const std::string, const unsigned int>(_descricao, _fator->getNivelLexico()+1)];
 				_classificacao = _resultadoBusca->second->getConteudo();
 
 				_encontrado = true;
